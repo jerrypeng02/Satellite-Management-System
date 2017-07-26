@@ -70,9 +70,9 @@ TCB* tail;
 
 // main
 int main(void) {
-    
+
     // Declare some TCBs
-    
+
     // PowerSubsystemData
     TCB powerSubsystemTask;
     PowerSubsystemData powerSubsystemData;
@@ -81,12 +81,12 @@ int main(void) {
     powerSubsystemData.batteryLev = &batteryLev;
     powerSubsystemData.powerCon = &powerCon;
     powerSubsystemData.powerGen = &powerGen;
-    
+
     powerSubsystemTask.taskDataPtr = (void*)&powerSubsystemData;
     powerSubsystemTask.taskPtr = powerSubsystem;
     insert(&powerSubsystemTask);
-    
-    
+
+
     // SolarPanelControlData
     TCB solarPanelControlTask;
     SolarPanelControlData solarPanelControlData;
@@ -95,32 +95,32 @@ int main(void) {
     solarPanelControlData.solarPanelRetract = &solarPanelRetract;
     solarPanelControlData.dmsInc = &dmsInc;
     solarPanelControlData.dmsDec = &dmsDec;
-    
+
     solarPanelControlTask.taskDataPtr = (void*)&solarPanelControlData;
     solarPanelControlTask.taskPtr = solarPanelControl;
     insert(&solarPanelControlTask);
 
-    
+
     // keyBoardConsoleData
     TCB keyBoardConsoleTask;
     KeyBoardConsoleData keyBoardConsoleData;
     keyBoardConsoleData.dmsInc = &dmsInc;
     keyBoardConsoleData.dmsDec = &dmsDec;
-    
+
     keyBoardConsoleTask.taskDataPtr = (void*)&keyBoardConsoleData;
     keyBoardConsoleTask.taskPtr = keyBoardConsole;
     insert(&keyBoardConsoleTask);
-    
+
     // ThrusterSubsystemData
     TCB thrusterSubsystemTask;
     ThrusterSubsystemData thrusterSubsystemData;
     thrusterSubsystemData.thrusterComm = &thrusterComm;
     thrusterSubsystemData.fuelLev = &fuelLev;
-    
+
     thrusterSubsystemTask.taskDataPtr = (void*)&thrusterSubsystemData;
     thrusterSubsystemTask.taskPtr = thrusterSubsystem;
     insert(&thrusterSubsystemTask);
-    
+
     // SatelliteComsData
     TCB satelliteComsTask;
     SatelliteComsData satelliteComsData;
@@ -132,21 +132,21 @@ int main(void) {
     satelliteComsData.powerCon = &powerCon;
     satelliteComsData.powerGen = &powerGen;
     satelliteComsData.thrusterComm = &thrusterComm;
-    
+
     satelliteComsTask.taskDataPtr = (void*)&satelliteComsData;
     satelliteComsTask.taskPtr = satelliteComs;
     insert(&satelliteComsTask);
-    
+
     // VehicleCommsData
     TCB vehicleCommsTask;
     VehicleCommsData vehicleCommsData;
     vehicleCommsData.command = &command;
     vehicleCommsData.response = &response;
-    
+
     vehicleCommsTask.taskDataPtr = (void*)&vehicleCommsData;
     vehicleCommsTask.taskPtr = vehicleComms;
     insert(&vehicleCommsTask);
-    
+
     // ConsoleDisplayData
     TCB consoleDisplayTask;
     ConsoleDisplayData consoleDisplayData;
@@ -157,11 +157,11 @@ int main(void) {
     consoleDisplayData.fuelLev = &fuelLev;
     consoleDisplayData.powerCon = &powerCon;
     consoleDisplayData.powerGen = &powerGen;
-    
+
     consoleDisplayTask.taskDataPtr = (void*)&consoleDisplayData;
     consoleDisplayTask.taskPtr = consoleDisplay;
     insert(&consoleDisplayTask);
-    
+
     // WarningAlarmData
     TCB warningAlarmTask;
     WarningAlarmData warningAlarmData;
@@ -169,17 +169,17 @@ int main(void) {
     warningAlarmData.batteryLow = &batteryLow;
     warningAlarmData.batteryLev = &batteryLev;
     warningAlarmData.fuelLev = &fuelLev;
-    
+
     warningAlarmTask.taskDataPtr = (void*)&warningAlarmData;
     warningAlarmTask.taskPtr = warningAlarm;
     insert(&warningAlarmTask);
-    
+
     // schedule and dispatch the tasks
-    
+
     time_t lastTime = time(NULL);
-    
+
     TCB* tcbPtr;
-    
+
     while (1) {
         tcbPtr = head;
         while (tcbPtr != NULL) {
@@ -212,6 +212,29 @@ void insert(TCB* node) {
         // to the prior last node at this point
         tail = node; // update the tail pointer
     }
+    return;
+}
+
+// Delete function
+// Arguments: Pointer to TCB node
+void delete(TCB* node) {
+    /* If node to be deleted is head node */
+    if(head == node)
+        head = node->next;
+
+    if(tail == node)
+        tail = node->prev;
+
+    /* Change next only if node to be deleted is NOT the last node */
+    if(node->next != NULL)
+        node->next->prev = del->prev;
+
+    /* Change prev only if node to be deleted is NOT the first node */
+    if(node->prev != NULL)
+        node->prev->next = node->next;
+
+    /* Finally, free the memory occupied by del*/
+    //free(node);
     return;
 }
 
@@ -271,4 +294,3 @@ void insert(TCB* node) {
  majorCycle = FALSE;
  }
  }*/
-
