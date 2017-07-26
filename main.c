@@ -231,7 +231,7 @@ void delete(TCB* node) {
 
     /* Change next only if node to be deleted is NOT the last node */
     if(node->next != NULL)
-        node->next->prev = del->prev;
+        node->next->prev = node->prev;
 
     /* Change prev only if node to be deleted is NOT the first node */
     if(node->prev != NULL)
