@@ -1,11 +1,3 @@
-//
-//  keyBoardConsole.h
-//  
-//
-//  Created by Ningyang Peng on 7/25/17.
-//
-//
-
 #ifndef keyBoardConsole_h
 #define keyBoardConsole_h
 
