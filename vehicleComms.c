@@ -11,7 +11,7 @@
 #include <sys/types.h>
 #include <unistd.h>
 
-#define MAX_SIZE 1024;
+#define MAX_SIZE 1024
 
 // vehicle communication function
 void vehicleComms(void* data) {
@@ -42,7 +42,7 @@ void vehicleComms(void* data) {
         mkfifo(FIFO_FILE, 0666); // create the FIFO (named pipe)
         int fd0 = open(FIFO_FILE, O_RDWR); // open the FIFO
         write(fd0, command, 1);
-        int result = read(fd0, buf, MAX_BUF);
+        int result = read(fd0, buf, MAX_SIZE);
         if (result > 0) {
             *response = 'A';
         }

@@ -1,7 +1,12 @@
 #include "keyBoardConsole.h"
 #include "solarPanelControl.h"
 #include "constant.h"
+
 #include <time.h>
+#include <fcntl.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <unistd.h>
 
 // keyboard console function
 void keyBoardConsole(void* data) {
@@ -23,13 +28,13 @@ void keyBoardConsole(void* data) {
     ssize_t result = read(fdr, userInput, 1);
     if (result > 0) {
         if (solarPanelRetract || solarPanelDeploy) {
-            if(userinput[0] == 'i') {
+            if(userInput[0] == 'i') {
                 dmsInc = TRUE;
             } else {
                 dmsInc = FALSE;
             }
-            if(userinput[0] == 'd') {
-                dmsDec = TURE;
+            if(userInput[0] == 'd') {
+                dmsDec = TRUE;
             } else {
                 dmsDec = FALSE;
             }

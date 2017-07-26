@@ -2,6 +2,11 @@
 #include "constant.h"
 #include "util.h"
 
+#include <fcntl.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <unistd.h>
+
 #define MAX_SIZE 1024
 
 FILE *fp = NULL; // declare temp earth output file here
@@ -45,7 +50,7 @@ void satelliteComs(void* data) {
 
 	    // Read the buffer from the file
         fseek(fp, 0, SEEK_SET);
-        fread(buffer, 1, MAX, fp);
+        fread(buffer, 1, MAX_SIZE, fp);
 
         // Transmit buffer to terminal
         dprintf(fdEarthW, "%s\n", buffer);
