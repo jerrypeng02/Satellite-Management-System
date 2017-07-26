@@ -8,6 +8,9 @@ void pauseSec(int sec); // software timer
 
 // keyboard console function
 void keyBoardConsole(void* data) {
+    if (taskCounter % MINOR_CYCLE_NUM_IN_MAJOR != 0)
+        return;
+
     Bool dmsInc = *((KeyBoardConsoleData*)data)->dmsInc;
     Bool dmsDec = *((KeyBoardConsoleData*)data)->dmsDec;
     Bool solarPanelDeploy = *((SolarPanelControlData*)data)->solarPanelDeploy;

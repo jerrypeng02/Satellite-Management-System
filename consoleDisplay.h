@@ -1,11 +1,3 @@
-//
-//  consoleDisplay.h
-//  
-//
-//  Created by Ningyang Peng on 7/25/17.
-//
-//
-
 #ifndef __CONSOLEDISPLAY_H__
 #define __CONSOLEDISPLAY_H__
 

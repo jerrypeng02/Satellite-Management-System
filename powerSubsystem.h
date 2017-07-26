@@ -1,11 +1,3 @@
-//
-//  powerSubsystem.h
-//  
-//
-//  Created by Ningyang Peng on 7/25/17.
-//
-//
-
 #ifndef powerSubsystem_h
 #define powerSubsystem_h
 

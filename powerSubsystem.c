@@ -1,11 +1,3 @@
-//
-//  powerSubsystem.c
-//  
-//
-//  Created by Ningyang Peng on 7/25/17.
-//
-//
-
 #include "powerSubsystem.h"
 #include "constant.h"
 
