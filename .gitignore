@@ -1,3 +1,9 @@
+# executable file
+main
+
+# Mac System file
+.DS_Store
+
 # Prerequisites
 *.d
 
