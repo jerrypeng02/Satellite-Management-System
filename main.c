@@ -17,11 +17,7 @@
 #include <limits.h>
 #include <unistd.h>
 
-
-const unsigned long MINOR_CYCLE_NUM_IN_MAJOR = 50;
-const unsigned long MINOR_CYCLE_MICROS = 20000;
-const unsigned long MAJOR_CYCLE_SEC = 5;
-
+/*************TaskQueue related********************/
 // Declare a TCB structure
 struct TaskControlBlock {
     void(*taskPtr)(void*);
@@ -32,9 +28,20 @@ struct TaskControlBlock {
 typedef struct TaskControlBlock TCB;
 
 void insert(TCB* node);
+void delete(TCB* node);
 
+TCB* head;
+TCB* tail;
+
+/*************Time related********************/
+const unsigned long MINOR_CYCLE_NUM_IN_MAJOR = 50;
+const unsigned long MINOR_CYCLE_MICROS = 20000;
+const unsigned long MAJOR_CYCLE_SEC = 5;
+
+void delay_ms(int);
 unsigned long taskCounter = 0;
 
+/*************Global Varaible********************/
 // thruster control
 unsigned int thrusterComm = 0;
 
@@ -65,14 +72,11 @@ Bool batteryLow = FALSE;
 // time pause function
 //void pauseSec(int sec);
 
-TCB* head;
-TCB* tail;
-
+/********** startup Function ********/
 // main
 int main(void) {
 
     // Declare some TCBs
-
     // PowerSubsystemData
     TCB powerSubsystemTask;
     PowerSubsystemData powerSubsystemData;
@@ -238,6 +242,9 @@ void delete(TCB* node) {
     return;
 }
 
+void delay_ms(int time_in_ms) {
+
+}
 //#include <stdio.h>
 //#include <time.h>
 //void pauseSec(int sec); // software timer

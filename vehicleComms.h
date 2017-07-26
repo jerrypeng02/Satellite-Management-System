@@ -9,6 +9,7 @@ struct VehicleCommsDataStruct {
     char* command;
     char* response;
 };
+
 typedef struct VehicleCommsDataStruct VehicleCommsData;
 
 #endif /* vehicleComms_h */

@@ -3,9 +3,6 @@
 
 #include "constant.h"
 
-// satellite communication function
-void satelliteComs(void* data);
-
 //
 struct SatelliteComsDataStruct {
     Bool* fuelLow;
@@ -18,6 +15,14 @@ struct SatelliteComsDataStruct {
     unsigned int* thrusterComm;
 };
 typedef struct SatelliteComsDataStruct SatelliteComsData;
+
+extern char earthCommend;
+
+// satellite communication function
+void satelliteComs(void* data);
+
+// output to earth
+void earthOutput(char* output);
 
 
 #endif /* satelliteComs_h */
