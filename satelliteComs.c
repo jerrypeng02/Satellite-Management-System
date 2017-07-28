@@ -6,12 +6,21 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>
+#include <string.h>
+
+#ifdef BEAGLEBONE
+#define EARTH_COMMAND "/dev/pts/0"
+#define EARTH_TERMINAL "/dev/pts/1"
+#else
+#define EARTH_COMMAND "/dev/ttys000"
+#define EARTH_TERMINAL "/dev/ttys001"
+#endif
 
 #define MAX_SIZE 1024
 
 FILE *fp = NULL; // declare temp earth output file here
 
-char earthCommend;
+char earthCommand;
 // satellite communication function
 void satelliteComs(void* data) {
 
@@ -23,9 +32,9 @@ void satelliteComs(void* data) {
 
     // connect to earth terminal
     if (fdEarthR == -1)
-        fdEarthR = open("/dev/ttys001", O_RDONLY | O_NONBLOCK);
+        fdEarthR = open(EARTH_COMMAND, O_RDONLY | O_NONBLOCK);
     if (fdEarthW == -1)
-        fdEarthW = open("/dev/ttys001", O_WRONLY);
+        fdEarthW = open(EARTH_TERMINAL, O_WRONLY);
 
     // initialize
     if (fp == NULL) {
@@ -35,15 +44,18 @@ void satelliteComs(void* data) {
         }
     }
 
-    // error structure name error
     *((SatelliteComsData*)data)->thrusterComm = randomInteger(0, 0xFFFF);
-    ssize_t result = read(fdEarthR, &earthCommend, 1);
-    if (result <= 0) {
-        earthCommend = 0;
-    }
 
+    // read earthCommand
     char buffer[MAX_SIZE];
-
+    ssize_t result = read(fdEarthR, buffer, MAX_SIZE);
+    
+    if (result != -1) {
+        earthCommand = buffer[0];
+    } else {
+        earthCommand = 0;
+    }
+    
     if (fdEarthW && fp) {
     	dprintf(fdEarthW, "\033[2J");
     	dprintf(fdEarthW, "\033[1;1H");

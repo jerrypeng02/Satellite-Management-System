@@ -1,4 +1,5 @@
 #include "keyBoardConsole.h"
+#include "satelliteComs.h"
 #include "solarPanelControl.h"
 #include "constant.h"
 
@@ -19,25 +20,16 @@ void keyBoardConsole(void* data) {
     Bool solarPanelDeploy = *((SolarPanelControlData*)data)->solarPanelDeploy;
     Bool solarPanelRetract = *((SolarPanelControlData*)data)->solarPanelRetract;
 
-    static int fdr = -1;
-
-    if (fdr == -1)
-        fdr = open("/dev/ttys000", O_RDONLY | O_NONBLOCK);
-
-    char userInput[1];
-    ssize_t result = read(fdr, userInput, 1);
-    if (result > 0) {
-        if (solarPanelRetract || solarPanelDeploy) {
-            if(userInput[0] == 'i') {
-                dmsInc = TRUE;
-            } else {
-                dmsInc = FALSE;
-            }
-            if(userInput[0] == 'd') {
-                dmsDec = TRUE;
-            } else {
-                dmsDec = FALSE;
-            }
+    if (solarPanelRetract || solarPanelDeploy) {
+        if(earthCommand == 'i') {
+            dmsInc = TRUE;
+        } else {
+            dmsInc = FALSE;
+        }
+        if(earthCommand == 'd') {
+            dmsDec = TRUE;
+        } else {
+            dmsDec = FALSE;
         }
     }
 }

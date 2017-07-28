@@ -12,8 +12,10 @@
 void consoleDisplay(void* data) {
 
     static int mode = 0;
-    if (earthCommend == 't') {
+    //printf("%c", earthCommand);
+    if (earthCommand == 't') {
         mode = 1 - mode;
+        earthCommand = 0;
     }
 
     if (*((ConsoleDisplayData*)data)->batteryLev < 15)
@@ -27,21 +29,19 @@ void consoleDisplay(void* data) {
 
     char output[MAX_SIZE];
     if (mode == 0) {
-        sprintf(output, "Solar Panel State: %d\n", *((ConsoleDisplayData*)data)->solarPanelState);
-        sprintf(output, "Battery Level: %d\n", *((ConsoleDisplayData*)data)->batteryLev);
-        sprintf(output, "Fuel Level: %d\n", *((ConsoleDisplayData*)data)->fuelLev);
-        sprintf(output, "Power consumption: %d\n", *((ConsoleDisplayData*)data)->powerCon);
+        sprintf(output, "Solar Panel State: %d\n"
+                        "Battery Level: %d\n"
+                        "Fuel Level: %d\n"
+                        "Power consumption: %d\n",
+                *((ConsoleDisplayData*)data)->solarPanelState,
+                *((ConsoleDisplayData*)data)->batteryLev,
+                *((ConsoleDisplayData*)data)->fuelLev,
+                *((ConsoleDisplayData*)data)->powerCon);
     } else {
-        if (*((ConsoleDisplayData*)data)->batteryLow) {
-            sprintf(output, "Battery Level is Low\n");
-        } else {
-            sprintf(output, "Battery Level is Normal\n");
-        }
-        if (*((ConsoleDisplayData*)data)->fuelLow) {
-            sprintf(output, "Fuel Level is Low\n");
-        }else {
-            sprintf(output, "Fuel Level is Normal\n");
-        }
+        sprintf(output, "Battery Level is %s\n"
+                        "Fuel Level is %s\n",
+                *((ConsoleDisplayData*)data)->batteryLow? "low" : "normal",
+                *((ConsoleDisplayData*)data)->fuelLow? "low" : "normal");
     }
     earthOutput(output);
 }

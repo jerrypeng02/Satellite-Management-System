@@ -1,5 +1,10 @@
 # executable file
 main
+earthOutput.txt
+led1.txt
+led2.txt
+led3.txt
+vehicle_main
 
 # Mac System file
 .DS_Store

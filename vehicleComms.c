@@ -16,6 +16,15 @@
 // vehicle communication function
 void vehicleComms(void* data) {
     
+    static int fdw = -1;
+    static int fdr = -1;
+    if (fdw == -1 && fdr == -1) {
+        mkfifo(FIFO_S_TO_V, 0666); // create the FIFO (named pipe)
+        fdw = open(FIFO_S_TO_V, O_WRONLY); // open the FIFO
+        mkfifo(FIFO_V_TO_S, 0666); // create the FIFO (named pipe)
+        fdr = open(FIFO_V_TO_S, O_RDONLY | O_NONBLOCK); // open the FIFO
+    }
+    
     if (taskCounter % MINOR_CYCLE_NUM_IN_MAJOR != 0)
         return;
 
@@ -31,25 +40,26 @@ void vehicleComms(void* data) {
         D Drill down – Start
         H Drill up – Stop
     */
-    if (earthCommend == 'F' ||
-            earthCommend == 'B' ||
-            earthCommend == 'L' ||
-            earthCommend == 'R' ||
-            earthCommend == 'D' ||
-            earthCommend == 'H') {
-        *command = earthCommend;
+    if (earthCommand == 'F' ||
+            earthCommand == 'B' ||
+            earthCommand == 'L' ||
+            earthCommand == 'R' ||
+            earthCommand == 'D' ||
+            earthCommand == 'H') {
+        *command = earthCommand;
+        earthCommand = 0;
 
-        mkfifo(FIFO_FILE, 0666); // create the FIFO (named pipe)
-        int fd0 = open(FIFO_FILE, O_RDWR); // open the FIFO
-        write(fd0, command, 1);
-        int result = read(fd0, buf, MAX_SIZE);
-        if (result > 0) {
-            *response = 'A';
-        }
-        earthOutput(buf);
-        close(fd0); // close the FIFO
+        write(fdw, command, 1);
+        //close(fd0); // close the FIFO
         /* remove the FIFO */
         //unlink(myfifo0);
 
+    }
+    
+    int result = read(fdr, buf, MAX_SIZE);
+    if (result > 0) {
+        *response = 'A';
+        buf[result] = '\0';
+        earthOutput(buf);
     }
 }

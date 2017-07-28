@@ -16,7 +16,7 @@ struct SatelliteComsDataStruct {
 };
 typedef struct SatelliteComsDataStruct SatelliteComsData;
 
-extern char earthCommend;
+extern char earthCommand;
 
 // satellite communication function
 void satelliteComs(void* data);
