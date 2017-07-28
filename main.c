@@ -42,7 +42,16 @@ void delay_ms(int);
 unsigned long taskCounter = 0;
 time_t lastTime;
 
-/*************Global Varaible********************/
+/*************solarPanelControlVariable********************/
+
+
+/*************PWM********************/
+const int HEADER = 9;
+const int PIN = 14;
+const int PERIOD = 500000000;
+
+
+/*************Global Variable********************/
 // thruster control
 unsigned int thrusterComm = 0;
 
@@ -98,86 +107,86 @@ WarningAlarmData warningAlarmData;
 void startup() {
     taskCounter = 0;
     lastTime = time(NULL);
-    
+
     // thruster control
     thrusterComm = 0;
-    
+
     // power management
     batteryLevPtr = buffer;
     batteryLev = 100;
     fuelLev = 100;
     powerCon = 0;
     powerGen = 0;
-    
+
     solarPanelState = FALSE;
     solarPanelDeploy = FALSE;
     solarPanelRetract = FALSE;
-    
+
     // vehivle communications
     command = NULL;
     response = NULL;
-    
+
     // solar panel control
     dmsInc = FALSE;
     dmsDec = FALSE;
-    
+
     // warning alarm
     fuelLow = FALSE;
     batteryLow = FALSE;
-    
+
     // clear TCB
     head = tail = NULL;
-    
+
     // PowerSubsystemData
     powerSubsystemData.batteryLevPtr = &batteryLevPtr;
     powerSubsystemData.solarPanelDeploy = &solarPanelDeploy;
     powerSubsystemData.solarPanelRetract = &solarPanelRetract;
     powerSubsystemData.solarPanelState = &solarPanelState;
-    powerSubsystemData.batteryLev = &batteryLev;
+    //powerSubsystemData.batteryLev = &batteryLev;
     powerSubsystemData.powerCon = &powerCon;
     powerSubsystemData.powerGen = &powerGen;
-    
+
     powerSubsystemTask.taskDataPtr = (void*)&powerSubsystemData;
     powerSubsystemTask.taskPtr = powerSubsystem;
     powerSubsystemTask.next = NULL;
     powerSubsystemTask.prev = NULL;
     insert(&powerSubsystemTask);
-    
-    
+
+
     // SolarPanelControlData
     solarPanelControlData.solarPanelState = &solarPanelState;
     solarPanelControlData.solarPanelDeploy = &solarPanelDeploy;
     solarPanelControlData.solarPanelRetract = &solarPanelRetract;
     solarPanelControlData.dmsInc = &dmsInc;
     solarPanelControlData.dmsDec = &dmsDec;
-    
+
     solarPanelControlTask.taskDataPtr = (void*)&solarPanelControlData;
     solarPanelControlTask.taskPtr = solarPanelControl;
     solarPanelControlTask.next = NULL;
     solarPanelControlTask.prev = NULL;
     insert(&solarPanelControlTask);
-    
-    
+
+
     // keyBoardConsoleData
     keyBoardConsoleData.dmsInc = &dmsInc;
     keyBoardConsoleData.dmsDec = &dmsDec;
-    
+
     keyBoardConsoleTask.taskDataPtr = (void*)&keyBoardConsoleData;
     keyBoardConsoleTask.taskPtr = keyBoardConsole;
     keyBoardConsoleTask.next = NULL;
     keyBoardConsoleTask.prev = NULL;
     insert(&keyBoardConsoleTask);
-    
+
     // ThrusterSubsystemData
     thrusterSubsystemData.thrusterComm = &thrusterComm;
     thrusterSubsystemData.fuelLev = &fuelLev;
-    
+
     thrusterSubsystemTask.taskDataPtr = (void*)&thrusterSubsystemData;
     thrusterSubsystemTask.taskPtr = thrusterSubsystem;
     thrusterSubsystemTask.next = NULL;
     thrusterSubsystemTask.prev = NULL;
     insert(&thrusterSubsystemTask);
-    
+
     // SatelliteComsData
     satelliteComsData.fuelLow = &fuelLow;
     satelliteComsData.batteryLow = &batteryLow;
@@ -187,23 +196,23 @@ void startup() {
     satelliteComsData.powerCon = &powerCon;
     satelliteComsData.powerGen = &powerGen;
     satelliteComsData.thrusterComm = &thrusterComm;
-    
+
     satelliteComsTask.taskDataPtr = (void*)&satelliteComsData;
     satelliteComsTask.taskPtr = satelliteComs;
     satelliteComsTask.next = NULL;
     satelliteComsTask.prev = NULL;
     insert(&satelliteComsTask);
-    
+
     // VehicleCommsData
     vehicleCommsData.command = &command;
     vehicleCommsData.response = &response;
-    
+
     vehicleCommsTask.taskDataPtr = (void*)&vehicleCommsData;
     vehicleCommsTask.taskPtr = vehicleComms;
     vehicleCommsTask.next = NULL;
     vehicleCommsTask.prev = NULL;
     insert(&vehicleCommsTask);
-    
+
     // ConsoleDisplayData
     consoleDisplayData.fuelLow = &fuelLow;
     consoleDisplayData.batteryLow = &batteryLow;
@@ -212,19 +221,19 @@ void startup() {
     consoleDisplayData.fuelLev = &fuelLev;
     consoleDisplayData.powerCon = &powerCon;
     consoleDisplayData.powerGen = &powerGen;
-    
+
     consoleDisplayTask.taskDataPtr = (void*)&consoleDisplayData;
     consoleDisplayTask.taskPtr = consoleDisplay;
     consoleDisplayTask.next = NULL;
     consoleDisplayTask.prev = NULL;
     insert(&consoleDisplayTask);
-    
+
     // WarningAlarmData
     warningAlarmData.fuelLow = &fuelLow;
     warningAlarmData.batteryLow = &batteryLow;
     warningAlarmData.batteryLev = &batteryLev;
     warningAlarmData.fuelLev = &fuelLev;
-    
+
     warningAlarmTask.taskDataPtr = (void*)&warningAlarmData;
     warningAlarmTask.taskPtr = warningAlarm;
     warningAlarmTask.next = NULL;
@@ -236,7 +245,7 @@ void startup() {
 int main(void) {
     // schedule and dispatch the tasks
     TCB* tcbPtr;
-    
+
     startup();
 
     while (1) {

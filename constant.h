@@ -15,6 +15,11 @@ extern const unsigned long MAJOR_CYCLE_SEC;
 
 extern unsigned long taskCounter;
 
+
+extern const int HEADER;
+extern const int PIN;
+extern const int PERIOD;
+
 enum _Boolean { FALSE = 0, TRUE = 1 };
 
 typedef enum _Boolean Bool;

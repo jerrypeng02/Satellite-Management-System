@@ -20,43 +20,43 @@ void powerSubsystem(void* data) {
     unsigned short motorDrive = 0;
 
     if(powerIncrease) {
-        if (*((PowerSubsystemData*)data)->powerCon <= 10){
+        if (*powerCon <= 10){
             if (powerCount % 2 == 0) {
-                *((PowerSubsystemData*)data)->powerCon += 2;
+                *powerCon += 2;
             } else {
-                *((PowerSubsystemData*)data)->powerCon -= 1;
+                *powerCon -= 1;
             }
         }
-        if (*((PowerSubsystemData*)data)->powerCon > 10) {
+        if (*powerCon > 10) {
             powerIncrease = FALSE;
         }
     } else {
-        if (*((PowerSubsystemData*)data)->powerCon >= 5){
+        if (*powerCon >= 5){
             if (powerCount % 2 == 0) {
-                *((PowerSubsystemData*)data)->powerCon -= 2;
+                *powerCon -= 2;
             } else {
-                *((PowerSubsystemData*)data)->powerCon += 1;
+                *powerCon += 1;
             }
         }
-        if (*((PowerSubsystemData*)data)->powerCon < 5) {
+        if (*powerCon < 5) {
             powerIncrease = TRUE;
         }
     }
 
     if(solarPanelState){
-        if(*((PowerSubsystemData*)data)->batteryLev > 95){
-            *((PowerSubsystemData*)data)->solarPanelState = FALSE;
-            *((PowerSubsystemData*)data)->powerGen = 0;
+        if(*batteryLevPtr > 95){
+            *solarPanelRetract = TRUE;
+            *powerGen = 0;
         }else{
-            if (*((PowerSubsystemData*)data)->batteryLev <= 50){
+            if (*batteryLevPtr <= 50){
                 if (powerCount % 2 == 0){
-                    *((PowerSubsystemData*)data)->powerGen += 2;
+                    *powerGen += 2;
                 } else {
-                    *((PowerSubsystemData*)data)->powerGen += 1;
+                    *powerGen += 1;
                 }
             } else {
                 if (powerCount % 2 == 0){
-                    *((PowerSubsystemData*)data)->powerGen += 2;
+                    *powerGen += 2;
                 }
             }
         }
@@ -81,8 +81,8 @@ void powerSubsystem(void* data) {
     }
 */
     // we change the condition of opening solar panel to when the battery level is less than 40
-    if (!solarPanelState && *((PowerSubsystemData*)data)->batteryLev <= 36) {
-        *((PowerSubsystemData*)data)->solarPanelState = TRUE;
+    if (!solarPanelState && *batteryLevPtr <= 36) {
+        *solarPanelDeploy = TRUE;
     }
 
     FILE *ain,*aval0,*aval1; // create some buffers
