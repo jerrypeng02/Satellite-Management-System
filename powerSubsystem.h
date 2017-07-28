@@ -12,6 +12,7 @@ struct PowerSubsystemDataStruct {
     Bool* solarPanelDeploy;
     Bool* solarPanelRetract;
     unsigned int** batteryLevPtr;
+    unsigned short* batteryLev;
     unsigned short* powerCon;
     unsigned short* powerGen;
 };

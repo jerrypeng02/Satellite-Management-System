@@ -71,7 +71,6 @@ void solarPanelControl(void* data) {
 
     int counter = 0;
 
-    while(1){
         if(counter <= moterDrive){
             pwm = TRUE;
         }else{
@@ -89,18 +88,11 @@ void solarPanelControl(void* data) {
         if(counter > 100){
             counter = 0;
         }
-        // delay
-        for(j = 0; j<1000000;j++);
-    }
 
     solarPanelDeploy = &pwm;
     solarPanelRetract = &pwm;
+<<<<<<< HEAD
     */
-
-
-
-
-
 
 
 }
