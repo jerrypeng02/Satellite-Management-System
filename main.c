@@ -17,11 +17,7 @@
 #include <limits.h>
 #include <unistd.h>
 
-
-const unsigned long MINOR_CYCLE_NUM_IN_MAJOR = 50;
-const unsigned long MINOR_CYCLE_MICROS = 20000;
-const unsigned long MAJOR_CYCLE_SEC = 5;
-
+/*************TaskQueue related********************/
 // Declare a TCB structure
 struct TaskControlBlock {
     void(*taskPtr)(void*);
@@ -32,12 +28,26 @@ struct TaskControlBlock {
 typedef struct TaskControlBlock TCB;
 
 void insert(TCB* node);
+void delete(TCB* node);
 
+TCB* head = NULL;
+TCB* tail = NULL;
+
+/*************Time related********************/
+const unsigned long MINOR_CYCLE_NUM_IN_MAJOR = 50;
+const unsigned long MINOR_CYCLE_MS = 20;
+const unsigned long MAJOR_CYCLE_SEC = 5;
+
+void delay_ms(int);
 unsigned long taskCounter = 0;
+time_t lastTime;
 
+/*************Global Varaible********************/
 // thruster control
 unsigned int thrusterComm = 0;
 
+
+unsigned int buffer[16];
 // power management
 unsigned int* batteryLevPtr = 0;
 //TODO: point to 16 reading buffer
@@ -62,21 +72,66 @@ Bool dmsDec = FALSE;
 Bool fuelLow = FALSE;
 Bool batteryLow = FALSE;
 
+
+// Declare some TCBs
+TCB powerSubsystemTask;
+PowerSubsystemData powerSubsystemData;
+TCB solarPanelControlTask;
+SolarPanelControlData solarPanelControlData;
+TCB keyBoardConsoleTask;
+KeyBoardConsoleData keyBoardConsoleData;
+TCB thrusterSubsystemTask;
+ThrusterSubsystemData thrusterSubsystemData;
+TCB satelliteComsTask;
+SatelliteComsData satelliteComsData;
+TCB vehicleCommsTask;
+VehicleCommsData vehicleCommsData;
+TCB consoleDisplayTask;
+ConsoleDisplayData consoleDisplayData;
+TCB warningAlarmTask;
+WarningAlarmData warningAlarmData;
+
 // time pause function
 //void pauseSec(int sec);
 
-TCB* head;
-TCB* tail;
-
-// main
-int main(void) {
+/********** startup Function ********/
+void startup() {
+    taskCounter = 0;
+    lastTime = time(NULL);
     
-    // Declare some TCBs
+    // thruster control
+    thrusterComm = 0;
+    
+    // power management
+    batteryLevPtr = buffer;
+    batteryLev = 100;
+    fuelLev = 100;
+    powerCon = 0;
+    powerGen = 0;
+    
+    solarPanelState = FALSE;
+    solarPanelDeploy = FALSE;
+    solarPanelRetract = FALSE;
+    
+    // vehivle communications
+    command = NULL;
+    response = NULL;
+    
+    // solar panel control
+    dmsInc = FALSE;
+    dmsDec = FALSE;
+    
+    // warning alarm
+    fuelLow = FALSE;
+    batteryLow = FALSE;
+    
+    // clear TCB
+    head = tail = NULL;
     
     // PowerSubsystemData
-    TCB powerSubsystemTask;
-    PowerSubsystemData powerSubsystemData;
     powerSubsystemData.batteryLevPtr = &batteryLevPtr;
+    powerSubsystemData.solarPanelDeploy = &solarPanelDeploy;
+    powerSubsystemData.solarPanelRetract = &solarPanelRetract;
     powerSubsystemData.solarPanelState = &solarPanelState;
     powerSubsystemData.batteryLev = &batteryLev;
     powerSubsystemData.powerCon = &powerCon;
@@ -84,12 +139,12 @@ int main(void) {
     
     powerSubsystemTask.taskDataPtr = (void*)&powerSubsystemData;
     powerSubsystemTask.taskPtr = powerSubsystem;
+    powerSubsystemTask.next = NULL;
+    powerSubsystemTask.prev = NULL;
     insert(&powerSubsystemTask);
     
     
     // SolarPanelControlData
-    TCB solarPanelControlTask;
-    SolarPanelControlData solarPanelControlData;
     solarPanelControlData.solarPanelState = &solarPanelState;
     solarPanelControlData.solarPanelDeploy = &solarPanelDeploy;
     solarPanelControlData.solarPanelRetract = &solarPanelRetract;
@@ -98,32 +153,32 @@ int main(void) {
     
     solarPanelControlTask.taskDataPtr = (void*)&solarPanelControlData;
     solarPanelControlTask.taskPtr = solarPanelControl;
+    solarPanelControlTask.next = NULL;
+    solarPanelControlTask.prev = NULL;
     insert(&solarPanelControlTask);
-
+    
     
     // keyBoardConsoleData
-    TCB keyBoardConsoleTask;
-    KeyBoardConsoleData keyBoardConsoleData;
     keyBoardConsoleData.dmsInc = &dmsInc;
     keyBoardConsoleData.dmsDec = &dmsDec;
     
     keyBoardConsoleTask.taskDataPtr = (void*)&keyBoardConsoleData;
     keyBoardConsoleTask.taskPtr = keyBoardConsole;
+    keyBoardConsoleTask.next = NULL;
+    keyBoardConsoleTask.prev = NULL;
     insert(&keyBoardConsoleTask);
     
     // ThrusterSubsystemData
-    TCB thrusterSubsystemTask;
-    ThrusterSubsystemData thrusterSubsystemData;
     thrusterSubsystemData.thrusterComm = &thrusterComm;
     thrusterSubsystemData.fuelLev = &fuelLev;
     
     thrusterSubsystemTask.taskDataPtr = (void*)&thrusterSubsystemData;
     thrusterSubsystemTask.taskPtr = thrusterSubsystem;
+    thrusterSubsystemTask.next = NULL;
+    thrusterSubsystemTask.prev = NULL;
     insert(&thrusterSubsystemTask);
     
     // SatelliteComsData
-    TCB satelliteComsTask;
-    SatelliteComsData satelliteComsData;
     satelliteComsData.fuelLow = &fuelLow;
     satelliteComsData.batteryLow = &batteryLow;
     satelliteComsData.solarPanelState = &solarPanelState;
@@ -135,21 +190,21 @@ int main(void) {
     
     satelliteComsTask.taskDataPtr = (void*)&satelliteComsData;
     satelliteComsTask.taskPtr = satelliteComs;
+    satelliteComsTask.next = NULL;
+    satelliteComsTask.prev = NULL;
     insert(&satelliteComsTask);
     
     // VehicleCommsData
-    TCB vehicleCommsTask;
-    VehicleCommsData vehicleCommsData;
     vehicleCommsData.command = &command;
     vehicleCommsData.response = &response;
     
     vehicleCommsTask.taskDataPtr = (void*)&vehicleCommsData;
     vehicleCommsTask.taskPtr = vehicleComms;
+    vehicleCommsTask.next = NULL;
+    vehicleCommsTask.prev = NULL;
     insert(&vehicleCommsTask);
     
     // ConsoleDisplayData
-    TCB consoleDisplayTask;
-    ConsoleDisplayData consoleDisplayData;
     consoleDisplayData.fuelLow = &fuelLow;
     consoleDisplayData.batteryLow = &batteryLow;
     consoleDisplayData.solarPanelState = &solarPanelState;
@@ -160,11 +215,11 @@ int main(void) {
     
     consoleDisplayTask.taskDataPtr = (void*)&consoleDisplayData;
     consoleDisplayTask.taskPtr = consoleDisplay;
+    consoleDisplayTask.next = NULL;
+    consoleDisplayTask.prev = NULL;
     insert(&consoleDisplayTask);
     
     // WarningAlarmData
-    TCB warningAlarmTask;
-    WarningAlarmData warningAlarmData;
     warningAlarmData.fuelLow = &fuelLow;
     warningAlarmData.batteryLow = &batteryLow;
     warningAlarmData.batteryLev = &batteryLev;
@@ -172,22 +227,28 @@ int main(void) {
     
     warningAlarmTask.taskDataPtr = (void*)&warningAlarmData;
     warningAlarmTask.taskPtr = warningAlarm;
+    warningAlarmTask.next = NULL;
+    warningAlarmTask.prev = NULL;
     insert(&warningAlarmTask);
-    
+}
+
+// main
+int main(void) {
     // schedule and dispatch the tasks
-    
-    time_t lastTime = time(NULL);
-    
     TCB* tcbPtr;
     
+    startup();
+
     while (1) {
         tcbPtr = head;
+        int t = 0;
         while (tcbPtr != NULL) {
+            //printf("%d\n", t ++);
             tcbPtr->taskPtr((tcbPtr->taskDataPtr));
             tcbPtr = tcbPtr -> next;
         }
-        printf("%lu\n", taskCounter);
-        usleep(MINOR_CYCLE_MICROS);
+        //printf("\n%lu\n", taskCounter);
+        delay_ms(MINOR_CYCLE_MS);
         taskCounter ++;
     }
     return EXIT_SUCCESS;
@@ -215,60 +276,29 @@ void insert(TCB* node) {
     return;
 }
 
-//#include <stdio.h>
-//#include <time.h>
-//void pauseSec(int sec); // software timer
-//int main()
-//{
-//    FILE *ain,*aval0,*aval1; // create some buffers
-//    int value0,value1,i; // working variables
-//    // enable the ADC ports
-//    ain = fopen("/sys/devices/bone_capemgr.9/slots", "w");
-//    fseek(ain,0,SEEK_SET);
-//    fprintf(ain,"cape-bone-iio");
-//    fflush(ain);
-//    while(1)
-//    {
-//        // enable the ADC ports
-//        aval = fopen("/sys/devices/ocp.3/helper.15/AIN0", "r");
-//        fseek(aval0,0,SEEK_SET); // go to beginning of buffer
-//        fscanf(aval0,"%d",&value0); // write analog value to buffer
-//        fclose(aval0); // close buffer
-//        // delay
-//        for(i = 0; i<1000000;i++);
-//        // enable the ADC ports
-//        aval1 = fopen("/sys/devices/ocp.3/helper.15/AIN1","r");
-//        fseek(aval1,0,SEEK_SET); // go to beginning of buffer
-//        fscanf(aval1,"%d",&value1); // write analog value to buffer
-//        fclose(aval1); // close buffer
-//        // display readings
-//        printf("value0: %d value1: %d\n",value0,value1);
-//        // delay
-//        for(i = 0; i<1000000;i++);
-//    }
-//    fclose(ain);
-//    return 0;
-//}
-//
-//// delay function
-//void pauseSec(int sec)
-//{
-//    time_t now,later;
-//    now = time(NULL);
-//    later = time(NULL);
-//    while((later - now) < (double) sec)
-//        later = time(NULL);
-//}
+// Delete function
+// Arguments: Pointer to TCB node
+void delete(TCB* node) {
+    /* If node to be deleted is head node */
+    if(head == node)
+        head = node->next;
 
-// Test Error we didn't run every task in major cycle
-/*if (i == 0) {
- time_t currentTime = time(NULL);
- //printf("%ld\n", (currentTime - lastTime));
- if (currentTime - lastTime >= MAJOR_CYCLE_SEC) {
- majorCycle = TRUE;
- lastTime = currentTime;
- } else {
- majorCycle = FALSE;
- }
- }*/
+    if(tail == node)
+        tail = node->prev;
 
+    /* Change next only if node to be deleted is NOT the last node */
+    if(node->next != NULL)
+        node->next->prev = node->prev;
+
+    /* Change prev only if node to be deleted is NOT the first node */
+    if(node->prev != NULL)
+        node->prev->next = node->next;
+
+    /* Finally, free the memory occupied by del*/
+    //free(node);
+    return;
+}
+
+void delay_ms(int time_in_ms) {
+    usleep(time_in_ms * 1000);
+}
