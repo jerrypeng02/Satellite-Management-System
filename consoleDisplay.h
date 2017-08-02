@@ -15,6 +15,8 @@ struct ConsoleDisplayDataStruct {
     unsigned short* fuelLev;
     unsigned short* powerCon;
     unsigned short* powerGen;
+    transportDis;
+    batteryTemp;
 };
 typedef struct ConsoleDisplayDataStruct ConsoleDisplayData;
 
