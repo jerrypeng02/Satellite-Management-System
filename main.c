@@ -141,8 +141,8 @@ void startup() {
     solarPanelRetract = FALSE;
     
     // image capture
-    unsigned int* imageDataRawPtr = 0;
-    unsigned int* imageDataPtr = 0;
+    imageDataRawPtr = 0;
+    imageDataPtr = 0;
 
     // vehivle communications
     command = NULL;
@@ -164,7 +164,7 @@ void startup() {
     powerSubsystemData.solarPanelDeploy = &solarPanelDeploy;
     powerSubsystemData.solarPanelRetract = &solarPanelRetract;
     powerSubsystemData.solarPanelState = &solarPanelState;
-    //powerSubsystemData.batteryLev = &batteryLev;
+    powerSubsystemData.batteryLev = &batteryLev;
     powerSubsystemData.powerCon = &powerCon;
     powerSubsystemData.powerGen = &powerGen;
 
@@ -293,9 +293,25 @@ int main(void) {
 
     startup();
 
+    static int append = 0;
+
     while (1) {
         tcbPtr = head;
         int t = 0;
+        if ((solarPanelState && !solarPanelDeploy) || 
+                (!solarPanelState && !solarPanelRetract)) {
+            if (append==1) {
+                printf("Appending solar and keyboard\n");
+                insert(&solarPanelControlTask);
+                insert(&keyBoardConsoleTask);
+                append = 0;
+            }
+        } else if (!append) { 
+            printf("Removing solar and keyboard\n");
+            remove(&solarPanelControlTask);
+            remove(&keyBoardConsoleTask);
+            append = 1;
+        }  
         while (tcbPtr != NULL) {
             //printf("%d\n", t ++);
             tcbPtr->taskPtr((tcbPtr->taskDataPtr));
