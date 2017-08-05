@@ -16,28 +16,28 @@ void solarPanelControl(void* data) {
     Bool* dmsInc = ((SolarPanelControlData*)data)->dmsInc;
     Bool* dmsDec = ((SolarPanelControlData*)data)->dmsDec;
 
-    unsigned short moterDrive = 0;
+    unsigned short motorDrive = 0;
 
 
     if(*dmsInc){
-        if(moterDrive <100){
-            moterDrive += 5;
+        if(motorDrive <100){
+            motorDrive += 5;
         }else{
-            moterDrive = 100;
+            motorDrive = 100;
         }
     }
     if(*dmsDec){
-        if(moterDrive > 0){
-            moterDrive -= 5;
+        if(motorDrive > 0){
+            motorDrive -= 5;
         }else{
-            moterDrive = 0;
+            motorDrive = 0;
         }
     }
     if(*solarPanelDeploy){
-        solarPanelProgress += moterDrive;
+        solarPanelProgress += motorDrive;
     }
     if(*solarPanelRetract){
-        solarPanelProgress -= moterDrive;
+        solarPanelProgress -= motorDrive;
     }
 
     if(solarPanelProgress >= 100){
@@ -50,11 +50,11 @@ void solarPanelControl(void* data) {
     }
 
     if(*solarPanelState && *solarPanelDeploy){
-        moterDrive = 0;
+        motorDrive = 0;
         *solarPanelDeploy = FALSE;
     }
     if(!*solarPanelState && *solarPanelRetract){
-        moterDrive = 0;
+        motorDrive = 0;
         *solarPanelRetract = FALSE;
     }
 
@@ -62,7 +62,7 @@ void solarPanelControl(void* data) {
 
     int pwm = bbb_enablePwm(HEADER, PIN);
     int pwmPeriod = bbb_setPwmPeriod(HEADER, PIN, PERIOD);
-    int pwmDuty = bbb_setPwmDuty(HEADER, PIN, moterDrive/100 * PERIOD);
+    int pwmDuty = bbb_setPwmDuty(HEADER, PIN, motorDrive/100 * PERIOD);
 
 
 
@@ -71,17 +71,17 @@ void solarPanelControl(void* data) {
 
     int counter = 0;
 
-        if(counter <= moterDrive){
+        if(counter <= motorDrive){
             pwm = TRUE;
         }else{
             pwm = FALSE;
         }
 
         if(dmsInc){
-            moterDrive += 5;
+            motorDrive += 5;
         }
         if(dmsDec){
-            moterDrive -= 5;
+            motorDrive -= 5;
         }
 
         counter++;

@@ -22,6 +22,7 @@
 struct TaskControlBlock {
     void(*taskPtr)(void*);
     void* taskDataPtr;
+    int priority;
     struct TaskControlBlock* next;
     struct TaskControlBlock* prev;
 };
@@ -76,6 +77,10 @@ unsigned short fuelLev = 100;
 unsigned short powerCon = 0;
 unsigned short powerGen = 0;
 
+// image capture
+unsigned int* imageDataRawPtr = 0;
+unsigned int* imageDataPtr = 0;
+
 Bool solarPanelState = FALSE;
 Bool solarPanelDeploy = FALSE;
 Bool solarPanelRetract = FALSE;
@@ -96,18 +101,31 @@ Bool batteryLow = FALSE;
 // Declare some TCBs
 TCB powerSubsystemTask;
 PowerSubsystemData powerSubsystemData;
+
 TCB solarPanelControlTask;
 SolarPanelControlData solarPanelControlData;
+
 TCB keyBoardConsoleTask;
 KeyBoardConsoleData keyBoardConsoleData;
+
 TCB thrusterSubsystemTask;
 ThrusterSubsystemData thrusterSubsystemData;
+
 TCB satelliteComsTask;
 SatelliteComsData satelliteComsData;
+
 TCB vehicleCommsTask;
 VehicleCommsData vehicleCommsData;
+
+TCB transportDistanceTask;
+TransportDistanceData transportDistanceData;
+
+TCB imageCaptureTask;
+ImageCaptureData imageCaptureData;
+
 TCB consoleDisplayTask;
 ConsoleDisplayData consoleDisplayData;
+
 TCB warningAlarmTask;
 WarningAlarmData warningAlarmData;
 
@@ -133,6 +151,10 @@ void startup() {
     solarPanelState = FALSE;
     solarPanelDeploy = FALSE;
     solarPanelRetract = FALSE;
+    
+    // image capture
+    imageDataRawPtr = 0;
+    imageDataPtr = 0;
 
     batteryOverTemp = FALSE;
 
@@ -233,6 +255,26 @@ void startup() {
     vehicleCommsTask.next = NULL;
     vehicleCommsTask.prev = NULL;
     insert(&vehicleCommsTask);
+    
+    // TransportDistanceData
+    transportDistanceTask. = &;
+    transportDistanceTask. = &;
+    
+    transportDistanceTask.taskDataPtr = (void*)&transportDistanceData;
+    transportDistanceTask.taskPtr = transportDistance;
+    transportDistanceTask.next = NULL;
+    transportDistanceTask.prev = NULL;
+    insert(&transportDistanceTask);
+    
+    // ImageCaptureData
+    imageCaptureTask.command = &command;
+    imageCaptureTask.response = &response;
+    
+    imageCaptureTask.taskDataPtr = (void*)&imageCaptureData;
+    imageCaptureTask.taskPtr = imageCapture;
+    imageCaptureTask.next = NULL;
+    imageCaptureTask.prev = NULL;
+    insert(&imageCaptureTask);
 
     // ConsoleDisplayData
     consoleDisplayData.fuelLow = &fuelLow;
@@ -242,6 +284,8 @@ void startup() {
     consoleDisplayData.fuelLev = &fuelLev;
     consoleDisplayData.powerCon = &powerCon;
     consoleDisplayData.powerGen = &powerGen;
+    consoleDisplayData.batteryTemp = &batteryTemp;
+    consoleDisplayData.transportDis = &transportDis;
 
     consoleDisplayTask.taskDataPtr = (void*)&consoleDisplayData;
     consoleDisplayTask.taskPtr = consoleDisplay;
@@ -254,6 +298,7 @@ void startup() {
     warningAlarmData.batteryLow = &batteryLow;
     warningAlarmData.batteryLev = &batteryLev;
     warningAlarmData.fuelLev = &fuelLev;
+    warningAlarmData.BOT = &BOT;
 
     warningAlarmTask.taskDataPtr = (void*)&warningAlarmData;
     warningAlarmTask.taskPtr = warningAlarm;
@@ -269,9 +314,25 @@ int main(void) {
 
     startup();
 
+    static int append = 0;
+
     while (1) {
         tcbPtr = head;
         int t = 0;
+        if ((solarPanelState && !solarPanelDeploy) || 
+                (!solarPanelState && !solarPanelRetract)) {
+            if (append==1) {
+                printf("Appending solar and keyboard\n");
+                insert(&solarPanelControlTask);
+                insert(&keyBoardConsoleTask);
+                append = 0;
+            }
+        } else if (!append) { 
+            printf("Removing solar and keyboard\n");
+            remove(&solarPanelControlTask);
+            remove(&keyBoardConsoleTask);
+            append = 1;
+        }  
         while (tcbPtr != NULL) {
             //printf("%d\n", t ++);
             tcbPtr->taskPtr((tcbPtr->taskDataPtr));
