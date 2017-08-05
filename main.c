@@ -56,11 +56,22 @@ const int PERIOD = 500000000;
 unsigned int thrusterComm = 0;
 
 
-unsigned int buffer[16];
+
 // power management
-unsigned int* batteryLevPtr = 0;
+unsigned int batteryLevel[16];
+unsigned int* batteryLevPtr;
+
+double batteryTemp1[16];
+double* batteryTempPtr1;
+
+double batteryTemp2[16];
+double* batteryTempPtr2;
+
+Bool batteryOverTemp = FALSE;
+
+
 //TODO: point to 16 reading buffer
-unsigned short batteryLev = 100;
+unsigned short batteryLev;
 unsigned short fuelLev = 100;
 unsigned short powerCon = 0;
 unsigned short powerGen = 0;
@@ -69,7 +80,7 @@ Bool solarPanelState = FALSE;
 Bool solarPanelDeploy = FALSE;
 Bool solarPanelRetract = FALSE;
 
-// vehivle communications
+// vehicle communications
 char command = NULL;
 char response = NULL;
 
@@ -112,8 +123,9 @@ void startup() {
     thrusterComm = 0;
 
     // power management
-    batteryLevPtr = buffer;
-    batteryLev = 100;
+    batteryLevPtr = batteryLevel;
+    batteryTempPtr1 = batteryTemp1;
+    batteryTempPtr2 = batteryTemp2;
     fuelLev = 100;
     powerCon = 0;
     powerGen = 0;
@@ -122,7 +134,10 @@ void startup() {
     solarPanelDeploy = FALSE;
     solarPanelRetract = FALSE;
 
-    // vehivle communications
+    batteryOverTemp = FALSE;
+
+
+    // vehicle communications
     command = NULL;
     response = NULL;
 
@@ -142,9 +157,15 @@ void startup() {
     powerSubsystemData.solarPanelDeploy = &solarPanelDeploy;
     powerSubsystemData.solarPanelRetract = &solarPanelRetract;
     powerSubsystemData.solarPanelState = &solarPanelState;
-    //powerSubsystemData.batteryLev = &batteryLev;
+    powerSubsystemData.batteryLev = &batteryLev;
     powerSubsystemData.powerCon = &powerCon;
     powerSubsystemData.powerGen = &powerGen;
+    powerSubsystemData.batteryTempPtr1 = &batteryTempPtr1;
+    powerSubsystemData.batteryTempPtr2 = &batteryTempPtr2;
+    powerSubsystemData.batteryOverTemp = &batteryOverTemp;
+
+
+
 
     powerSubsystemTask.taskDataPtr = (void*)&powerSubsystemData;
     powerSubsystemTask.taskPtr = powerSubsystem;
