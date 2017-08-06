@@ -2,6 +2,7 @@
 #include "consoleDisplay.h"
 #include "keyBoardConsole.h"
 #include "powerSubsystem.h"
+#include "imageCapture.h"
 #include "satelliteComs.h"
 #include "solarPanelControl.h"
 #include "thrusterSubsystem.h"
