@@ -67,8 +67,7 @@ unsigned short powerCon = 0;
 unsigned short powerGen = 0;
 
 // image capture
-unsigned int* imageDataRawPtr = 0;
-unsigned int* imageDataPtr = 0;
+unsigned int* imageFrequencyPtr = NULL;
 
 Bool solarPanelState = FALSE;
 Bool solarPanelDeploy = FALSE;
@@ -246,8 +245,7 @@ void startup() {
     insert(&transportDistanceTask);
     
     // ImageCaptureData
-    imageCaptureTask.command = &command;
-    imageCaptureTask.response = &response;
+    imageCaptureTask.imageFrequencyPtr = &imageFrequencyPtr;
     
     imageCaptureTask.taskDataPtr = (void*)&imageCaptureData;
     imageCaptureTask.taskPtr = imageCapture;

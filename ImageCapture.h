@@ -4,8 +4,7 @@
 void imageCapture(void* data);
 
 struct ImageCaptureDataStruct {
-    unsigned int* imageDataRawPtr;
-    unsigned int* imageDataPtr;
+    unsigned int** imageFrequencyPtr;
 };
 
 typedef struct ImageCaptureDataStruct ImageCaptureData;

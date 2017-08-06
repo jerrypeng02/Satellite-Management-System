@@ -83,13 +83,8 @@ void controlPower(PowerSubsystemData* data) {
 
 
     // we change the condition of opening solar panel to when the battery level is less than 40
-<<<<<<< HEAD
     if (!solarPanelState && *batteryLevPtr <= 36) {
         *solarPanelDeploy = TRUE;
-=======
-    if (!solarPanelState && *batteryLev <= 36) {
-        *solarPanelState = TRUE;
->>>>>>> 9e90fea3b40e21100ed1efa4e51c958e5278cbb2
     }
 }
 
