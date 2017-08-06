@@ -29,17 +29,21 @@ void consoleDisplay(void* data) {
 
     char output[MAX_SIZE];
     if (mode == 0) {
-        sprintf(output, "Solar Panel State: %d\n"
-                        "Battery Level: %d\n"
-                        "Fuel Level: %d\n"
-                        "Power consumption: %d\n",
+        sprintf(output, "Solar panel state: %d\n"
+                        "Battery level: %d\n"
+                        "Fuel level: %d\n"
+                        "Power consumption: %d\n"
+                        "Battery temperature: %d\n"
+                        "Transport distance: %d\n",
                 *((ConsoleDisplayData*)data)->solarPanelState,
                 *((ConsoleDisplayData*)data)->batteryLev,
                 *((ConsoleDisplayData*)data)->fuelLev,
-                *((ConsoleDisplayData*)data)->powerCon);
+                *((ConsoleDisplayData*)data)->powerCon
+                *((ConsoleDisplayData*)data)->batteryTemp,
+                *((ConsoleDisplayData*)data)->transportDis);
     } else {
-        sprintf(output, "Battery Level is %s\n"
-                        "Fuel Level is %s\n",
+        sprintf(output, "Battery level is %s\n"
+                        "Fuel level is %s\n",
                 *((ConsoleDisplayData*)data)->batteryLow? "low" : "normal",
                 *((ConsoleDisplayData*)data)->fuelLow? "low" : "normal");
     }

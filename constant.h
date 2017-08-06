@@ -17,6 +17,8 @@ extern const unsigned long MAJOR_CYCLE_SEC;
 
 extern unsigned long taskCounter;
 
+extern unsigned int highFreq;
+extern unsigned int lowFreq;
 
 extern const int HEADER;
 extern const int PIN;

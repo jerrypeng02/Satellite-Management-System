@@ -65,6 +65,7 @@ unsigned short batteryLev = 100;
 unsigned short fuelLev = 100;
 unsigned short powerCon = 0;
 unsigned short powerGen = 0;
+Bool BOT = FALSE;
 
 // image capture
 unsigned int* imageDataRawPtr = 0;
@@ -85,6 +86,13 @@ Bool dmsDec = FALSE;
 // warning alarm
 Bool fuelLow = FALSE;
 Bool batteryLow = FALSE;
+
+// transport distance
+unsigned int transBuffer[8];
+unsigned int* transportDis = 0;
+unsigned int highLimit = 120;
+unsigned int lowLimit = 6;
+
 
 
 // Declare some TCBs
@@ -236,8 +244,7 @@ void startup() {
     insert(&vehicleCommsTask);
     
     // TransportDistanceData
-    transportDistanceTask. = &;
-    transportDistanceTask. = &;
+    transportDistanceTask.transportDis = &transportDis;
     
     transportDistanceTask.taskDataPtr = (void*)&transportDistanceData;
     transportDistanceTask.taskPtr = transportDistance;
