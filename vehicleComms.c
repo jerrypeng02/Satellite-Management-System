@@ -58,8 +58,18 @@ void vehicleComms(void* data) {
     
     int result = read(fdr, buf, MAX_SIZE);
     if (result > 0) {
-        *response = 'A';
-        buf[result] = '\0';
-        earthOutput(buf);
+        if (result == 1) {
+            if (buf[0] == 'T') {
+                write(fdw, "K", 1);
+                printf("transport lift-off\n");
+            } else if (buf[0] == 'D') {
+                write(fdw, "C", 1);
+                printf("dock\n");
+            }
+        } else {
+            *response = 'A';
+            buf[result] = '\0';
+            earthOutput(buf);
+        }
     }
 }

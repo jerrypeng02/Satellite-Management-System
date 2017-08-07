@@ -15,6 +15,12 @@ struct PowerSubsystemDataStruct {
     unsigned short* batteryLev;
     unsigned short* powerCon;
     unsigned short* powerGen;
+    Bool* batteryOverTemp;
+
+
+    double** batteryTempPtr1;
+    double** batteryTempPtr2;
+
 };
 typedef struct PowerSubsystemDataStruct PowerSubsystemData;
 

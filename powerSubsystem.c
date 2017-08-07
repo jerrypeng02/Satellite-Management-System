@@ -12,6 +12,7 @@ void controlPower(PowerSubsystemData* data) {
     Bool* solarPanelState = data->solarPanelState;
     Bool* solarPanelDeploy = data->solarPanelDeploy;
     Bool* solarPanelRetract = data->solarPanelRetract;
+    unsigned int** batteryLevPtr = data->batteryLevPtr;
     unsigned short* batteryLev = data->batteryLev;
     unsigned short* powerCon = data->powerCon;
     unsigned short* powerGen = data->powerGen;
@@ -44,7 +45,7 @@ void controlPower(PowerSubsystemData* data) {
 
     if(solarPanelState){
         if(*batteryLev > 95){
-            *solarPanelState = FALSE;
+            *solarPanelRetract = TRUE;
             *powerGen = 0;
         }else{
             if (*batteryLev <= 50){
@@ -83,15 +84,65 @@ void controlPower(PowerSubsystemData* data) {
 
 
     // we change the condition of opening solar panel to when the battery level is less than 40
-<<<<<<< HEAD
-    if (!solarPanelState && *batteryLevPtr <= 36) {
+
+
+    if (!solarPanelState && (*batteryLevPtr)[powerCount % 16] <= 10) {
         *solarPanelDeploy = TRUE;
-=======
-    if (!solarPanelState && *batteryLev <= 36) {
-        *solarPanelState = TRUE;
->>>>>>> 9e90fea3b40e21100ed1efa4e51c958e5278cbb2
     }
+
+
+
 }
+
+
+void readBatteryTemp(PowerSubsystemData* data) {
+
+    Bool* batteryOverTemp = data->batteryOverTemp;
+    unsigned double** batteryTempPtr1 = data->batteryTempPtr1;
+    unsigned double** batteryTempPtr2 = data->batteryTempPtr2;
+
+
+
+    FILE *ain,*aval0,*aval1;
+
+    ain = fopen("/sys/devices/bone_capemgr.9/slots", "w");
+    fseek(ain,0,SEEK_SET);
+    fprintf(ain,"cape-bone-iio");
+    fflush(ain);
+
+    usleep(500);
+    aval0 = fopen("/sys/devices/ocp.3/helper.15/AIN1", "r");
+    fseek(aval0, 0, SEEK_SET); // go to beginning of buffer
+    fscanf(aval0, "%d", &(*(batteryTempPtr1 + powerCount % 16))); // write analog value to buffer
+    fclose(aval0); // close buffer
+
+    *(batteryTempPtr1 + powerCount % 16) /= 100;
+    *(batteryTempPtr1 + powerCount % 16) = *(batteryTempPtr1 + powerCount % 16) * 32 + 33;
+
+
+    aval0 = fopen("/sys/devices/ocp.3/helper.15/AIN2", "r");
+    fseek(aval1, 0, SEEK_SET); // go to beginning of buffer
+    fscanf(aval1, "%d", &(*(batteryTempPtr2 + powerCount % 16))); // write analog value to buffer
+    fclose(aval1); // close buffer
+
+    *(batteryTempPtr2 + powerCount % 16) /= 100;
+    *(batteryTempPtr2 + powerCount % 16) = *(batteryTempPtr1 + powerCount % 16) * 32 + 33;
+
+    if(powerCount > 0){
+        if(*(batteryTempPtr1 + powerCount % 16) > *(batteryTempPtr1 + (powerCount - 1) % 16) * 1.2){
+            *batteryOverTemp = TRUE;
+        }else if(*(batteryTempPtr2 + powerCount % 16) > *(batteryTempPtr2 + (powerCount - 1) % 16) * 1.2){
+            *batteryOverTemp = TRUE;
+        }else{
+            *batteryOverTemp = FALSE;
+        }
+    }
+
+    fclose(ain);
+
+
+}
+
 
 
 void readBatteryLevel(PowerSubsystemData* data) {
@@ -102,9 +153,8 @@ void readBatteryLevel(PowerSubsystemData* data) {
     unsigned short* powerGen = data->powerGen;
     Bool* solarPanelState = data->solarPanelState;
 
-    FILE *ain,*aval0;
     volatile int i, j;
-
+    FILE *ain,*aval0,*aval1;
 #ifdef BEAGLEBONE
 
     ain = fopen("/sys/devices/bone_capemgr.9/slots", "w");
@@ -114,26 +164,25 @@ void readBatteryLevel(PowerSubsystemData* data) {
 
     usleep(600);
 
-    for(i = 0; i < 16; i++){
 
-        aval0 = fopen("/sys/devices/ocp.3/helper.15/AIN0", "r");
-        fseek(aval0, 0, SEEK_SET); // go to beginning of buffer
-        fscanf(aval0, "%d", &(*batteryLevPtr[i])); // write analog value to buffer
-        fclose(aval0); // close buffer
+    aval0 = fopen("/sys/devices/ocp.3/helper.15/AIN0", "r");
+    fseek(aval0, 0, SEEK_SET); // go to beginning of buffer
+    fscanf(aval0, "%d", &(*(batteryLevPtr + powerCount % 16))); // write analog value to buffer
+    fclose(aval0); // close buffer
 
-        // delay
-        for(j = 0; j<1000;j++);
-    }
+    // delay
+    for(j = 0; j<1000;j++);
 
     fclose(ain);
 
-    int sum;
-    for(i = 0; i < 16; i++){
-        sum = sum + *batteryLevPtr[i];
-    }
-    sum /= 16;
 
-    *batteryLev = sum / 1800 * 100;
+    *batteryLev = *(batteryLevPtr + powerCount % 16) / 1800 * 100;
+    *(batteryLevPtr + powerCount % 16) *= 20;
+
+
+
+
+
 
 #else
     if(!*solarPanelState){
@@ -164,6 +213,7 @@ void powerSubsystem(void* data) {
         return;
 
     readBatteryLevel((PowerSubsystemData*) data);
+    readBatteryTemp((PowerSubsystemData*) data);
     controlPower((PowerSubsystemData*) data);
 
     powerCount ++;

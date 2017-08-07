@@ -2,6 +2,7 @@
 #include "consoleDisplay.h"
 #include "keyBoardConsole.h"
 #include "powerSubsystem.h"
+#include "imageCapture.h"
 #include "satelliteComs.h"
 #include "solarPanelControl.h"
 #include "thrusterSubsystem.h"
@@ -57,25 +58,35 @@ const int PERIOD = 500000000;
 unsigned int thrusterComm = 0;
 
 
-unsigned int buffer[16];
+
 // power management
-unsigned int* batteryLevPtr = 0;
+unsigned int batteryLevel[16];
+unsigned int* batteryLevPtr;
+
+double batteryTemp1[16];
+double* batteryTempPtr1;
+
+double batteryTemp2[16];
+double* batteryTempPtr2;
+
+Bool batteryOverTemp = FALSE;
+
+
 //TODO: point to 16 reading buffer
-unsigned short batteryLev = 100;
+unsigned short batteryLev;
 unsigned short fuelLev = 100;
 unsigned short powerCon = 0;
 unsigned short powerGen = 0;
 Bool BOT = FALSE;
 
 // image capture
-unsigned int* imageDataRawPtr = 0;
-unsigned int* imageDataPtr = 0;
+unsigned int* imageFrequencyPtr = NULL;
 
 Bool solarPanelState = FALSE;
 Bool solarPanelDeploy = FALSE;
 Bool solarPanelRetract = FALSE;
 
-// vehivle communications
+// vehicle communications
 char command = NULL;
 char response = NULL;
 
@@ -138,8 +149,9 @@ void startup() {
     thrusterComm = 0;
 
     // power management
-    batteryLevPtr = buffer;
-    batteryLev = 100;
+    batteryLevPtr = batteryLevel;
+    batteryTempPtr1 = batteryTemp1;
+    batteryTempPtr2 = batteryTemp2;
     fuelLev = 100;
     powerCon = 0;
     powerGen = 0;
@@ -149,10 +161,13 @@ void startup() {
     solarPanelRetract = FALSE;
     
     // image capture
-    unsigned int* imageDataRawPtr = 0;
-    unsigned int* imageDataPtr = 0;
+    imageDataRawPtr = 0;
+    imageDataPtr = 0;
 
-    // vehivle communications
+    batteryOverTemp = FALSE;
+
+
+    // vehicle communications
     command = NULL;
     response = NULL;
 
@@ -172,9 +187,15 @@ void startup() {
     powerSubsystemData.solarPanelDeploy = &solarPanelDeploy;
     powerSubsystemData.solarPanelRetract = &solarPanelRetract;
     powerSubsystemData.solarPanelState = &solarPanelState;
-    //powerSubsystemData.batteryLev = &batteryLev;
+    powerSubsystemData.batteryLev = &batteryLev;
     powerSubsystemData.powerCon = &powerCon;
     powerSubsystemData.powerGen = &powerGen;
+    powerSubsystemData.batteryTempPtr1 = &batteryTempPtr1;
+    powerSubsystemData.batteryTempPtr2 = &batteryTempPtr2;
+    powerSubsystemData.batteryOverTemp = &batteryOverTemp;
+
+
+
 
     powerSubsystemTask.taskDataPtr = (void*)&powerSubsystemData;
     powerSubsystemTask.taskPtr = powerSubsystem;
@@ -253,8 +274,7 @@ void startup() {
     insert(&transportDistanceTask);
     
     // ImageCaptureData
-    imageCaptureTask.command = &command;
-    imageCaptureTask.response = &response;
+    imageCaptureTask.imageFrequencyPtr = &imageFrequencyPtr;
     
     imageCaptureTask.taskDataPtr = (void*)&imageCaptureData;
     imageCaptureTask.taskPtr = imageCapture;
@@ -300,9 +320,25 @@ int main(void) {
 
     startup();
 
+    static int append = 0;
+
     while (1) {
         tcbPtr = head;
         int t = 0;
+        if ((solarPanelState && !solarPanelDeploy) || 
+                (!solarPanelState && !solarPanelRetract)) {
+            if (append==1) {
+                printf("Appending solar and keyboard\n");
+                insert(&solarPanelControlTask);
+                insert(&keyBoardConsoleTask);
+                append = 0;
+            }
+        } else if (!append) { 
+            printf("Removing solar and keyboard\n");
+            remove(&solarPanelControlTask);
+            remove(&keyBoardConsoleTask);
+            append = 1;
+        }  
         while (tcbPtr != NULL) {
             //printf("%d\n", t ++);
             tcbPtr->taskPtr((tcbPtr->taskDataPtr));
