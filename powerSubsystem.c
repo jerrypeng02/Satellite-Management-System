@@ -116,7 +116,10 @@ void readBatteryTemp(PowerSubsystemData* data) {
 #ifdef BEAGLEBONE
 
     FILE *ain,*aval0,*aval1;
+    int temp;
 
+    printf("2\n");
+    
     ain = fopen("/sys/devices/bone_capemgr.9/slots", "w");
     fseek(ain,0,SEEK_SET);
     fprintf(ain,"cape-bone-iio");
@@ -125,19 +128,24 @@ void readBatteryTemp(PowerSubsystemData* data) {
     usleep(500);
     aval0 = fopen("/sys/devices/ocp.3/helper.15/AIN1", "r");
     fseek(aval0, 0, SEEK_SET); // go to beginning of buffer
-    fscanf(aval0, "%d", *batteryTempPtr1); // write analog value to buffer
+    fscanf(aval0, "%d", &temp); // write analog value to buffer
     fclose(aval0); // close buffer
 
-    **batteryTempPtr1 /= 100;
+    **batteryTempPtr1 = ((double) temp) / 100.0;
     **batteryTempPtr1 = **batteryTempPtr1 * 32 + 33;
 
+    printf("2.5\n");
 
-    aval0 = fopen("/sys/devices/ocp.3/helper.15/AIN2", "r");
+    aval1 = fopen("/sys/devices/ocp.3/helper.15/AIN2", "r");
     fseek(aval1, 0, SEEK_SET); // go to beginning of buffer
-    fscanf(aval1, "%d", *batteryTempPtr2); // write analog value to buffer
+    fscanf(aval1, "%d", &temp); // write analog value to buffer
     fclose(aval1); // close buffer
 
-    **batteryTempPtr2 /= 100;
+    fclose(ain);
+
+    printf("3\n");
+
+    **batteryTempPtr2 = ((double) temp) / 100.0;
     **batteryTempPtr2 = **batteryTempPtr2 * 32 + 33;
 
     if(powerCount > 0) {
@@ -152,7 +160,7 @@ void readBatteryTemp(PowerSubsystemData* data) {
         }
     }
 
-    fclose(ain);
+    printf("4\n");
 
 #else
     **batteryTempPtr1 = 50;
@@ -175,6 +183,8 @@ void readBatteryLevel(PowerSubsystemData* data) {
     FILE *ain,*aval0,*aval1;
 #ifdef BEAGLEBONE
 
+    printf("0\n");
+
     ain = fopen("/sys/devices/bone_capemgr.9/slots", "w");
     fseek(ain,0,SEEK_SET);
     fprintf(ain,"cape-bone-iio");
@@ -182,17 +192,14 @@ void readBatteryLevel(PowerSubsystemData* data) {
 
     usleep(600);
 
-
     aval0 = fopen("/sys/devices/ocp.3/helper.15/AIN0", "r");
     fseek(aval0, 0, SEEK_SET); // go to beginning of buffer
     fscanf(aval0, "%d", (*batteryLevPtr + powerCount % 16)); // write analog value to buffer
     fclose(aval0); // close buffer
 
-    // delay
-    for(j = 0; j<1000;j++);
-
     fclose(ain);
 
+    printf("1 %d\n", **batteryLevPtr);
 
     *batteryLev = *(*batteryLevPtr + powerCount % 16) / 1800 * 100;
     *(*batteryLevPtr + powerCount % 16) *= 20;

@@ -22,7 +22,7 @@ unsigned long readData() {
     fflush(gpioC[0]);
     fclose(gpioC[0]);
 
-    usleep(1000);
+    usleep(10000);
     
     for(i = 1; i < 8; i++) {
         gpioC[i] = fopen(pinFile[i], "r");
@@ -55,6 +55,8 @@ unsigned long readData() {
     for(i = 0; i < 7; i++) {
         totalFreq += (1 << i) * freq[i];
     }
+
+    printf("%d\n", totalFreq);
 
     return totalFreq;
 }
