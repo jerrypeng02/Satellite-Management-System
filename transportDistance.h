@@ -7,9 +7,12 @@ void transportDistance(void* data);
 
 struct TransportDistanceDataStruct {
     
-    unsigned short* transportDis;
+    unsigned long* transportDis;
     
 };
+
+void enableGPIOforTransport();
+
 typedef struct TransportDistanceDataStruct TransportDistanceData;
 
 #endif /* transportDistance_h */

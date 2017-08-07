@@ -2,7 +2,7 @@ CC = gcc
 CFlAGS = -g -I
 
 HEADERS = constant.h util.h
-OBJ = main.o consoleDisplay.o keyBoardConsole.o powerSubsystem.o satelliteComs.o solarPanelControl.o thrusterSubsystem.o util.o vehicleComms.o warningAlarm.o
+OBJ = main.o bbb.o optfft.o consoleDisplay.o keyBoardConsole.o powerSubsystem.o imageCapture.o transportDistance.o satelliteComs.o solarPanelControl.o thrusterSubsystem.o util.o vehicleComms.o warningAlarm.o
 
 
 %.o: %.c

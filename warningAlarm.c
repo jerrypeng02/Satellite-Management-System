@@ -1,4 +1,5 @@
 #include "warningAlarm.h"
+#include "satelliteComs.h"
 #include "constant.h"
 
 #include <fcntl.h>
@@ -30,107 +31,85 @@
 
 // warning alarm function
 void warningAlarm(void* data) {
+    
+    int batteryLev = *((WarningAlarmData*)data)->batteryLev;
+    int fuelLev = *((WarningAlarmData*)data)->fuelLev;
+    Bool* batteryOverTemp = ((WarningAlarmData*)data)->batteryOverTemp;
+    
     static time_t start = 0;
-    static time_t occurTime = 0;
     
     if (start == 0)
         start = time(NULL);
-    
-    if(BOT)
-        occurTime = time(NULL);
 
     int flag = 0;
-    Bool alarm = FALSE;
     
     FILE *led;
     FILE *led1;
     FILE *led2;
     
-    int batteryLev = *((WarningAlarmData*)data)->batteryLev;
-    int fuelLev = *((WarningAlarmData*)data)->fuelLev;
-    Bool* BOT = *((WarningAlarmData*)data)->BOT;
-
-    
     time_t t = time(NULL);
     t = t - start;
-    
-    if (t % 2) {
-        if (batteryLev <= 10) {
-            flag |= 0x2;
-        }
-        
-        if (fuelLev <= 10) {
-            flag |= 0x1;
-        }
-    }
-    
-    if ((t / 2) % 2) {
-        if (batteryLev <= 50 && batteryLev > 10) {
-            flag |= 0x2;
-        }
-        
-        if (fuelLev <= 50 && fuelLev > 10) {
-            flag |= 0x1;
-        }
-    }
     
     if (batteryLev > 20 && fuelLev > 20) {
         flag |= 0x4;
     }
     
-    //
-    if ((t % 5) && (!alarm)) {
-        flag |= 0x3;
-    }
-    
     // TODO: check if alarm is acknowledged
     // CODE HERE
     // avaliable audible alarm;
-    FILE *gpioE, *gpioW;
-    char userInput[1];
+    FILE *gpioW;
+    static unsigned long startCounter = 0;
+    static int isOver = 0;
     
-    time_t currTime = time(NULL);
-    currTime = currTime - occurTime;
+    if (startCounter == 0 && *batteryOverTemp) {
+        startCounter = taskCounter;
+    }
     
-    gpioE = fopen("/sys/class/gpio/export", "w");
-    fseek(gpioE,0,SEEK_SET);
-    fprintf(gpioE,"65");
-    fflush(gpioE);
-    fclose(gpioE);
-    
-    if(BOT) {
-        if(currTime > 15000000000 && userInput[0] != 'a') {
-            gpioW = fopen("/sys/class/gpio/gpio7/value", "w");
-            fseek(gpioW,0,SEEK_SET);
-            fprintf(gpioW,"0");
-            fflush(gpioW);
-            fclose(gpioW);
-            
-            if (flag & 0x3) {
-                led1 = fopen(OUTPUT_LED1, "w");
-                led2 = fopen(OUTPUT_LED2, "w");
-                fprintf(led1, "%d", 1);
-                fprintf(led2, "%d", 1);
-                fflush(led1);
-                fflush(led2);
-                fclose(led1);
-                fclose(led2);
-            } else {
-                led1 = fopen(OUTPUT_LED1, "w");
-                led2 = fopen(OUTPUT_LED2, "w");
-                fprintf(led1, "%d", 0);
-                fprintf(led2, "%d", 0);
-                fflush(led1);
-                fflush(led2);
-                fclose(led1);
-                fclose(led2);
+    if (startCounter > 0) {
+        // in 15 sec
+        if (taskCounter - startCounter < MINOR_CYCLE_NUM_IN_MAJOR * 3) {
+            if (earthCommand == 'a') {
+                gpioW = fopen("/sys/class/gpio/gpio7/value", "w");
+                fseek(gpioW,0,SEEK_SET);
+                fprintf(gpioW,"1");
+                fflush(gpioW);
+                fclose(gpioW);
+                
+                startCounter = 0;
             }
-        } else if(currTime <= 15000000000 && userInput[0] == 'a') {
-            gpioW = fopen("/sys/class/gpio/gpio7/value", "w");
-            fseek(gpioW,0,SEEK_SET);
-            fprintf(gpioW,"1");
-            fflush(gpioW);
-            fclose(gpioW);
+        } else {
+            isOver = 1;
+            // after 15 sec
+        }
+    }
+    
+    if (isOver) {
+        if ((taskCounter / MINOR_CYCLE_NUM_IN_MAJOR) % 2 == 0) {
+            if ((taskCounter / MINOR_CYCLE_NUM_IN_MAJOR / 50) % 2 == 0) {
+                flag |= 0x3;
+            }
+        } else {
+            flag |= 0x3;
+        }
+    } else {
+        if (t % 2) {
+            if (batteryLev <= 10) {
+                flag |= 0x2;
+            }
+            
+            if (fuelLev <= 10) {
+                flag |= 0x1;
+            }
+        }
+        
+        if ((t / 2) % 2) {
+            if (batteryLev <= 50 && batteryLev > 10) {
+                flag |= 0x2;
+            }
+            
+            if (fuelLev <= 50 && fuelLev > 10) {
+                flag |= 0x1;
+            }
         }
     }
     
@@ -170,4 +149,19 @@ void warningAlarm(void* data) {
         fflush(led);
         fclose(led);
     }
+}
+
+
+void enableGPIOforWarning() {
+    FILE* gpioE = fopen("/sys/class/gpio/export", "w");
+    fseek(gpioE,0,SEEK_SET);
+    fprintf(gpioE,"7");
+    fflush(gpioE);
+    fclose(gpioE);
+    
+    FILE* gpioD = fopen("/sys/class/gpio/gpio7/direction", "w");
+    fseek(gpioD,0,SEEK_SET);
+    fprintf(gpioD,"out");
+    fflush(gpioD);
+    fclose(gpioD);
 }
