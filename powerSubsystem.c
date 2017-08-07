@@ -194,8 +194,8 @@ void readBatteryLevel(PowerSubsystemData* data) {
     fclose(ain);
 
 
-    *batteryLev = *(batteryLevPtr + powerCount % 16) / 1800 * 100;
-    *(batteryLevPtr + powerCount % 16) *= 20;
+    *batteryLev = *(*batteryLevPtr + powerCount % 16) * 100 / 1800;
+    *(*batteryLevPtr + powerCount % 16) *= 20;
 
 #else
     if(!*solarPanelState){
