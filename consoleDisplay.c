@@ -32,16 +32,24 @@ void consoleDisplay(void* data) {
         sprintf(output, "Solar Panel State: %d\n"
                         "Battery Level: %d\n"
                         "Fuel Level: %d\n"
-                        "Power consumption: %d\n",
+                        "Power consumption: %d\n"
+                        "Battery temperature 1 is %lf\n"
+                        "Battery temperature 2 is %lf\n"
+                        "Image frequency: %d\n",
                 *((ConsoleDisplayData*)data)->solarPanelState,
                 *((ConsoleDisplayData*)data)->batteryLev,
                 *((ConsoleDisplayData*)data)->fuelLev,
-                *((ConsoleDisplayData*)data)->powerCon);
+                *((ConsoleDisplayData*)data)->powerCon,
+                **((ConsoleDisplayData*)data)->batteryTempPtr1,
+                **((ConsoleDisplayData*)data)->batteryTempPtr2,
+                **((ConsoleDisplayData*)data)->imageFrequencyPtr);
     } else {
         sprintf(output, "Battery Level is %s\n"
-                        "Fuel Level is %s\n",
+                        "Fuel Level is %s\n"
+                        "Battery Tempature is %s\n",
                 *((ConsoleDisplayData*)data)->batteryLow? "low" : "normal",
-                *((ConsoleDisplayData*)data)->fuelLow? "low" : "normal");
+                *((ConsoleDisplayData*)data)->fuelLow? "low" : "normal",
+                *((ConsoleDisplayData*)data)->batteryOverTemp? "too high" : "normal");
     }
     earthOutput(output);
 }

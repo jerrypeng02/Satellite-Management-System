@@ -7,4 +7,6 @@ struct TransportDistanceDataStruct {
     
 };
 
+typedef struct TransportDistanceDataStruct TransportDistanceData;
+
 #endif /* transportDistance_h */

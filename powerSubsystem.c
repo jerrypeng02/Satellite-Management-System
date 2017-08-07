@@ -98,10 +98,22 @@ void controlPower(PowerSubsystemData* data) {
 void readBatteryTemp(PowerSubsystemData* data) {
 
     Bool* batteryOverTemp = data->batteryOverTemp;
-    unsigned double** batteryTempPtr1 = data->batteryTempPtr1;
-    unsigned double** batteryTempPtr2 = data->batteryTempPtr2;
+    double** batteryTempPtr1 = data->batteryTempPtr1;
+    double** batteryTempPtr2 = data->batteryTempPtr2;
 
+    if (*batteryTempPtr1 == &batteryTemp1[15]) {
+        *batteryTempPtr1 = batteryTemp1;
+    } else {
+        *batteryTempPtr1 = *batteryTempPtr1 + 1;
+    }
 
+    if (*batteryTempPtr2 == &batteryTemp2[15]) {
+        *batteryTempPtr2 = batteryTemp2;
+    } else {
+        *batteryTempPtr2 = *batteryTempPtr2 + 1;
+    }
+
+#ifdef BEAGLEBONE
 
     FILE *ain,*aval0,*aval1;
 
@@ -113,25 +125,27 @@ void readBatteryTemp(PowerSubsystemData* data) {
     usleep(500);
     aval0 = fopen("/sys/devices/ocp.3/helper.15/AIN1", "r");
     fseek(aval0, 0, SEEK_SET); // go to beginning of buffer
-    fscanf(aval0, "%d", &(*(batteryTempPtr1 + powerCount % 16))); // write analog value to buffer
+    fscanf(aval0, "%d", *batteryTempPtr1); // write analog value to buffer
     fclose(aval0); // close buffer
 
-    *(batteryTempPtr1 + powerCount % 16) /= 100;
-    *(batteryTempPtr1 + powerCount % 16) = *(batteryTempPtr1 + powerCount % 16) * 32 + 33;
+    **batteryTempPtr1 /= 100;
+    **batteryTempPtr1 = **batteryTempPtr1 * 32 + 33;
 
 
     aval0 = fopen("/sys/devices/ocp.3/helper.15/AIN2", "r");
     fseek(aval1, 0, SEEK_SET); // go to beginning of buffer
-    fscanf(aval1, "%d", &(*(batteryTempPtr2 + powerCount % 16))); // write analog value to buffer
+    fscanf(aval1, "%d", *batteryTempPtr2); // write analog value to buffer
     fclose(aval1); // close buffer
 
-    *(batteryTempPtr2 + powerCount % 16) /= 100;
-    *(batteryTempPtr2 + powerCount % 16) = *(batteryTempPtr1 + powerCount % 16) * 32 + 33;
+    **batteryTempPtr2 /= 100;
+    **batteryTempPtr2 = **batteryTempPtr2 * 32 + 33;
 
-    if(powerCount > 0){
-        if(*(batteryTempPtr1 + powerCount % 16) > *(batteryTempPtr1 + (powerCount - 1) % 16) * 1.2){
+    if(powerCount > 0) {
+        
+
+        if(**batteryTempPtr1 > *(batteryTemp1 + ((*batteryTempPtr1 - batteryTemp1) + 15) % 16) * 1.2){
             *batteryOverTemp = TRUE;
-        }else if(*(batteryTempPtr2 + powerCount % 16) > *(batteryTempPtr2 + (powerCount - 1) % 16) * 1.2){
+        }else if(**batteryTempPtr2 > *(batteryTemp2 + ((*batteryTempPtr2 - batteryTemp2) + 15) % 16) * 1.2){
             *batteryOverTemp = TRUE;
         }else{
             *batteryOverTemp = FALSE;
@@ -140,7 +154,11 @@ void readBatteryTemp(PowerSubsystemData* data) {
 
     fclose(ain);
 
-
+#else
+    **batteryTempPtr1 = 50;
+    **batteryTempPtr2 = 50;
+    *batteryOverTemp = FALSE;
+#endif
 }
 
 
@@ -178,11 +196,6 @@ void readBatteryLevel(PowerSubsystemData* data) {
 
     *batteryLev = *(batteryLevPtr + powerCount % 16) / 1800 * 100;
     *(batteryLevPtr + powerCount % 16) *= 20;
-
-
-
-
-
 
 #else
     if(!*solarPanelState){

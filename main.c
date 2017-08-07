@@ -3,6 +3,7 @@
 #include "keyBoardConsole.h"
 #include "powerSubsystem.h"
 #include "imageCapture.h"
+#include "transportDistance.h"
 #include "satelliteComs.h"
 #include "solarPanelControl.h"
 #include "thrusterSubsystem.h"
@@ -60,20 +61,17 @@ unsigned int thrusterComm = 0;
 
 
 // power management
-unsigned int batteryLevel[16];
-unsigned int* batteryLevPtr;
+unsigned int batteryLevel[16] = {0};
+unsigned int* batteryLevPtr = NULL;
 
-double batteryTemp1[16];
-double* batteryTempPtr1;
+double batteryTemp1[16] = {0};
+double* batteryTempPtr1 = NULL;
 
-double batteryTemp2[16];
-double* batteryTempPtr2;
+double batteryTemp2[16] = {0};
+double* batteryTempPtr2 = NULL;
 
 Bool batteryOverTemp = FALSE;
-
-
-//TODO: point to 16 reading buffer
-unsigned short batteryLev;
+unsigned short batteryLev = 0;
 unsigned short fuelLev = 100;
 unsigned short powerCon = 0;
 unsigned short powerGen = 0;
@@ -144,6 +142,7 @@ void startup() {
     batteryLevPtr = batteryLevel;
     batteryTempPtr1 = batteryTemp1;
     batteryTempPtr2 = batteryTemp2;
+    batteryOverTemp = FALSE;
     fuelLev = 100;
     powerCon = 0;
     powerGen = 0;
@@ -153,11 +152,7 @@ void startup() {
     solarPanelRetract = FALSE;
     
     // image capture
-    imageDataRawPtr = 0;
-    imageDataPtr = 0;
-
-    batteryOverTemp = FALSE;
-
+    imageFrequencyPtr = NULL;
 
     // vehicle communications
     command = NULL;
@@ -185,9 +180,6 @@ void startup() {
     powerSubsystemData.batteryTempPtr1 = &batteryTempPtr1;
     powerSubsystemData.batteryTempPtr2 = &batteryTempPtr2;
     powerSubsystemData.batteryOverTemp = &batteryOverTemp;
-
-
-
 
     powerSubsystemTask.taskDataPtr = (void*)&powerSubsystemData;
     powerSubsystemTask.taskPtr = powerSubsystem;
@@ -257,8 +249,8 @@ void startup() {
     insert(&vehicleCommsTask);
     
     // TransportDistanceData
-    transportDistanceTask. = &;
-    transportDistanceTask. = &;
+    //transportDistanceTask. = &;
+    //transportDistanceTask. = &;
     
     transportDistanceTask.taskDataPtr = (void*)&transportDistanceData;
     transportDistanceTask.taskPtr = transportDistance;
@@ -267,7 +259,7 @@ void startup() {
     insert(&transportDistanceTask);
     
     // ImageCaptureData
-    imageCaptureTask.imageFrequencyPtr = &imageFrequencyPtr;
+    imageCaptureData.imageFrequencyPtr = &imageFrequencyPtr;
     
     imageCaptureTask.taskDataPtr = (void*)&imageCaptureData;
     imageCaptureTask.taskPtr = imageCapture;
@@ -283,8 +275,11 @@ void startup() {
     consoleDisplayData.fuelLev = &fuelLev;
     consoleDisplayData.powerCon = &powerCon;
     consoleDisplayData.powerGen = &powerGen;
-    consoleDisplayData.batteryTemp = &batteryTemp;
-    consoleDisplayData.transportDis = &transportDis;
+    consoleDisplayData.imageFrequencyPtr = &imageFrequencyPtr;
+    consoleDisplayData.batteryTempPtr1 = &batteryTempPtr1;
+    consoleDisplayData.batteryTempPtr2 = &batteryTempPtr2;
+    consoleDisplayData.batteryOverTemp = &batteryOverTemp;
+    //consoleDisplayData.transportDis = &transportDis;
 
     consoleDisplayTask.taskDataPtr = (void*)&consoleDisplayData;
     consoleDisplayTask.taskPtr = consoleDisplay;
@@ -297,7 +292,6 @@ void startup() {
     warningAlarmData.batteryLow = &batteryLow;
     warningAlarmData.batteryLev = &batteryLev;
     warningAlarmData.fuelLev = &fuelLev;
-    warningAlarmData.BOT = &BOT;
 
     warningAlarmTask.taskDataPtr = (void*)&warningAlarmData;
     warningAlarmTask.taskPtr = warningAlarm;
@@ -328,8 +322,8 @@ int main(void) {
             }
         } else if (!append) { 
             printf("Removing solar and keyboard\n");
-            remove(&solarPanelControlTask);
-            remove(&keyBoardConsoleTask);
+            delete(&solarPanelControlTask);
+            delete(&keyBoardConsoleTask);
             append = 1;
         }  
         while (tcbPtr != NULL) {

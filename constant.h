@@ -17,6 +17,8 @@ extern const unsigned long MAJOR_CYCLE_SEC;
 
 extern unsigned long taskCounter;
 
+extern double batteryTemp1[16];
+extern double batteryTemp2[16];
 
 extern const int HEADER;
 extern const int PIN;
