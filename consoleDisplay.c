@@ -33,6 +33,7 @@ void consoleDisplay(void* data) {
                         "Battery Level: %d\n"
                         "Fuel Level: %d\n"
                         "Power consumption: %d\n"
+                        "Transport Distance: %lu\n"
                         "Battery temperature 1 is %lf\n"
                         "Battery temperature 2 is %lf\n"
                         "Image frequency: %d\n",
@@ -40,6 +41,7 @@ void consoleDisplay(void* data) {
                 *((ConsoleDisplayData*)data)->batteryLev,
                 *((ConsoleDisplayData*)data)->fuelLev,
                 *((ConsoleDisplayData*)data)->powerCon,
+                *((ConsoleDisplayData*)data)->transportDis,
                 **((ConsoleDisplayData*)data)->batteryTempPtr1,
                 **((ConsoleDisplayData*)data)->batteryTempPtr2,
                 **((ConsoleDisplayData*)data)->imageFrequencyPtr);

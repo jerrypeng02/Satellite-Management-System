@@ -12,6 +12,7 @@ struct WarningAlarmDataStruct {
     Bool* batteryLow;
     unsigned short* batteryLev;
     unsigned short* fuelLev;
+    Bool* batteryOverTemp;
 };
 typedef struct WarningAlarmDataStruct WarningAlarmData;
 

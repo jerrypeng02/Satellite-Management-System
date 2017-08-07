@@ -15,8 +15,8 @@ struct ConsoleDisplayDataStruct {
     unsigned short* fuelLev;
     unsigned short* powerCon;
     unsigned short* powerGen;
+    unsigned long* transportDis;
     unsigned int** imageFrequencyPtr;
-    unsigned int** transportDis;
     double** batteryTempPtr1;
     double** batteryTempPtr2;
     Bool* batteryOverTemp;

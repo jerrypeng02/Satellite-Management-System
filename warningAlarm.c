@@ -1,4 +1,5 @@
 #include "warningAlarm.h"
+#include "satelliteComs.h"
 #include "constant.h"
 
 #include <fcntl.h>
@@ -30,42 +31,86 @@
 
 // warning alarm function
 void warningAlarm(void* data) {
-    static time_t start = 0;
-    if (start == 0)
-        start = time(NULL);
-    //(WarningAlarmData*)data
-    int flag = 0;
-    
-    FILE *led;
     
     int batteryLev = *((WarningAlarmData*)data)->batteryLev;
     int fuelLev = *((WarningAlarmData*)data)->fuelLev;
+    Bool* batteryOverTemp = ((WarningAlarmData*)data)->batteryOverTemp;
+    
+    static time_t start = 0;
+    
+    if (start == 0)
+        start = time(NULL);
+
+    int flag = 0;
+    
+    FILE *led;
+    FILE *led1;
+    FILE *led2;
     
     time_t t = time(NULL);
     t = t - start;
     
-    if (t % 2) {
-        if (batteryLev <= 10) {
-            flag |= 0x2;
-        }
-        
-        if (fuelLev <= 10) {
-            flag |= 0x1;
-        }
-    }
-    
-    if ((t / 2) % 2) {
-        if (batteryLev <= 50 && batteryLev > 10) {
-            flag |= 0x2;
-        }
-        
-        if (fuelLev <= 50 && fuelLev > 10) {
-            flag |= 0x1;
-        }
-    }
-    
     if (batteryLev > 20 && fuelLev > 20) {
         flag |= 0x4;
+    }
+    
+    // TODO: check if alarm is acknowledged
+    // CODE HERE
+    // avaliable audible alarm;
+    FILE *gpioW;
+    static unsigned long startCounter = 0;
+    static int isOver = 0;
+    
+    if (startCounter == 0 && *batteryOverTemp) {
+        startCounter = taskCounter;
+    }
+    
+    if (startCounter > 0) {
+        // in 15 sec
+        if (taskCounter - startCounter < MINOR_CYCLE_NUM_IN_MAJOR * 3) {
+            if (earthCommand == 'a') {
+                gpioW = fopen("/sys/class/gpio/gpio7/value", "w");
+                fseek(gpioW,0,SEEK_SET);
+                fprintf(gpioW,"1");
+                fflush(gpioW);
+                fclose(gpioW);
+                
+                startCounter = 0;
+            }
+        } else {
+            isOver = 1;
+            // after 15 sec
+        }
+    }
+    
+    if (isOver) {
+        if ((taskCounter / MINOR_CYCLE_NUM_IN_MAJOR) % 2 == 0) {
+            if ((taskCounter / MINOR_CYCLE_NUM_IN_MAJOR / 50) % 2 == 0) {
+                flag |= 0x3;
+            }
+        } else {
+            flag |= 0x3;
+        }
+    } else {
+        if (t % 2) {
+            if (batteryLev <= 10) {
+                flag |= 0x2;
+            }
+            
+            if (fuelLev <= 10) {
+                flag |= 0x1;
+            }
+        }
+        
+        if ((t / 2) % 2) {
+            if (batteryLev <= 50 && batteryLev > 10) {
+                flag |= 0x2;
+            }
+            
+            if (fuelLev <= 50 && fuelLev > 10) {
+                flag |= 0x1;
+            }
+        }
     }
     
     // error: LED is always on
@@ -104,4 +149,19 @@ void warningAlarm(void* data) {
         fflush(led);
         fclose(led);
     }
+}
+
+
+void enableGPIOforWarning() {
+    FILE* gpioE = fopen("/sys/class/gpio/export", "w");
+    fseek(gpioE,0,SEEK_SET);
+    fprintf(gpioE,"7");
+    fflush(gpioE);
+    fclose(gpioE);
+    
+    FILE* gpioD = fopen("/sys/class/gpio/gpio7/direction", "w");
+    fseek(gpioD,0,SEEK_SET);
+    fprintf(gpioD,"out");
+    fflush(gpioD);
+    fclose(gpioD);
 }

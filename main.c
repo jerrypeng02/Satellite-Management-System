@@ -37,7 +37,7 @@ TCB* head = NULL;
 TCB* tail = NULL;
 
 /*************Time related********************/
-const unsigned long MINOR_CYCLE_NUM_IN_MAJOR = 50;
+const unsigned long MINOR_CYCLE_NUM_IN_MAJOR = 250;
 const unsigned long MINOR_CYCLE_MS = 20;
 const unsigned long MAJOR_CYCLE_SEC = 5;
 
@@ -95,6 +95,8 @@ Bool dmsDec = FALSE;
 Bool fuelLow = FALSE;
 Bool batteryLow = FALSE;
 
+// transport distance
+unsigned long transportDis = 0;
 
 // Declare some TCBs
 TCB powerSubsystemTask;
@@ -132,6 +134,12 @@ WarningAlarmData warningAlarmData;
 
 /********** startup Function ********/
 void startup() {
+
+#ifdef BEAGLEBONE
+    enableGPIOforTransport();
+    enableGPIOforWarning();
+#endif
+
     taskCounter = 0;
     lastTime = time(NULL);
 
@@ -249,8 +257,7 @@ void startup() {
     insert(&vehicleCommsTask);
     
     // TransportDistanceData
-    //transportDistanceTask. = &;
-    //transportDistanceTask. = &;
+    transportDistanceData.transportDis = &transportDis;
     
     transportDistanceTask.taskDataPtr = (void*)&transportDistanceData;
     transportDistanceTask.taskPtr = transportDistance;
@@ -275,11 +282,11 @@ void startup() {
     consoleDisplayData.fuelLev = &fuelLev;
     consoleDisplayData.powerCon = &powerCon;
     consoleDisplayData.powerGen = &powerGen;
+    consoleDisplayData.transportDis = &transportDis;
     consoleDisplayData.imageFrequencyPtr = &imageFrequencyPtr;
     consoleDisplayData.batteryTempPtr1 = &batteryTempPtr1;
     consoleDisplayData.batteryTempPtr2 = &batteryTempPtr2;
     consoleDisplayData.batteryOverTemp = &batteryOverTemp;
-    //consoleDisplayData.transportDis = &transportDis;
 
     consoleDisplayTask.taskDataPtr = (void*)&consoleDisplayData;
     consoleDisplayTask.taskPtr = consoleDisplay;
@@ -291,6 +298,7 @@ void startup() {
     warningAlarmData.fuelLow = &fuelLow;
     warningAlarmData.batteryLow = &batteryLow;
     warningAlarmData.batteryLev = &batteryLev;
+    warningAlarmData.batteryOverTemp = &batteryOverTemp;
     warningAlarmData.fuelLev = &fuelLev;
 
     warningAlarmTask.taskDataPtr = (void*)&warningAlarmData;
