@@ -16,6 +16,7 @@
 // vehicle communication function
 void vehicleComms(void* data) {
     
+    /*
     static int fdw = -1;
     static int fdr = -1;
     if (fdw == -1 && fdr == -1) {
@@ -32,7 +33,7 @@ void vehicleComms(void* data) {
 
     char *command = ((VehicleCommsData*)data)->command;
     char *response = ((VehicleCommsData*)data)->response;
-    /*
+    
         F Forward
         B Back
         L Left
@@ -40,6 +41,7 @@ void vehicleComms(void* data) {
         D Drill down – Start
         H Drill up – Stop
     */
+    /*
     if (earthCommand == 'F' ||
             earthCommand == 'B' ||
             earthCommand == 'L' ||
@@ -51,7 +53,6 @@ void vehicleComms(void* data) {
 
         write(fdw, command, 1);
         //close(fd0); // close the FIFO
-        /* remove the FIFO */
         //unlink(myfifo0);
 
     }
@@ -71,5 +72,5 @@ void vehicleComms(void* data) {
             buf[result] = '\0';
             earthOutput(buf);
         }
-    }
+    }*/
 }

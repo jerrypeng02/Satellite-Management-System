@@ -60,9 +60,9 @@ void solarPanelControl(void* data) {
 
 
 
-    int pwm = bbb_enablePwm(HEADER, PIN);
-    int pwmPeriod = bbb_setPwmPeriod(HEADER, PIN, PERIOD);
-    int pwmDuty = bbb_setPwmDuty(HEADER, PIN, motorDrive/100 * PERIOD);
+    // int pwm = bbb_enablePwm(HEADER, PIN);
+    // int pwmPeriod = bbb_setPwmPeriod(HEADER, PIN, PERIOD);
+    // int pwmDuty = bbb_setPwmDuty(HEADER, PIN, motorDrive/100 * PERIOD);
 
 
 

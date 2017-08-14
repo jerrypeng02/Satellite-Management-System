@@ -193,7 +193,7 @@ void startup() {
     powerSubsystemTask.taskPtr = powerSubsystem;
     powerSubsystemTask.next = NULL;
     powerSubsystemTask.prev = NULL;
-    insert(&powerSubsystemTask);
+    //insert(&powerSubsystemTask);
 
 
     // SolarPanelControlData
