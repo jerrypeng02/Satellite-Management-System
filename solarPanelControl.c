@@ -62,8 +62,6 @@ void solarPanelControl(void* data) {
     int pwmPeriod = bbb_setPwmPeriod(HEADER, PIN, PERIOD);
     int pwmDuty = bbb_setPwmDuty(HEADER, PIN, 30 * (PERIOD / 100));
 
-
-
     /*
     Bool pwm;
 

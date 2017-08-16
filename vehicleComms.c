@@ -17,6 +17,7 @@
 // vehicle communication function
 void vehicleComms(void* data) {
     
+    
     static int fdw = -1;
     static int fdr = -1;
     if (fdw == -1 && fdr == -1) {
@@ -25,6 +26,8 @@ void vehicleComms(void* data) {
         mkfifo(FIFO_V_TO_S, 0666); // create the FIFO (named pipe)
         fdr = open(FIFO_V_TO_S, O_RDONLY | O_NONBLOCK); // open the FIFO
     }
+
+    //printf("SSSS\n");
     
     if (taskCounter % MINOR_CYCLE_NUM_IN_MAJOR != 0)
         return;
@@ -33,14 +36,15 @@ void vehicleComms(void* data) {
 
     char *command = ((VehicleCommsData*)data)->command;
     char *response = ((VehicleCommsData*)data)->response;
-    /*
-        F Forward
-        B Back
-        L Left
-        R Right
-        D Drill down – Start
-        H Drill up – Stop
-    */
+    
+        // F Forward
+        // B Back
+        // L Left
+        // R Right
+        // D Drill down – Start
+        // H Drill up – Stop
+    
+    
     if (earthCommand == 'F' ||
             earthCommand == 'B' ||
             earthCommand == 'L' ||
@@ -52,7 +56,6 @@ void vehicleComms(void* data) {
 
         write(fdw, command, 1);
         //close(fd0); // close the FIFO
-        /* remove the FIFO */
         //unlink(myfifo0);
 
     }
