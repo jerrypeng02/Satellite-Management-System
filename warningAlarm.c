@@ -199,7 +199,7 @@ void enablePWM() {
         fclose(duty);
         fclose(period);
         fclose(run);
-        return 0;
+        //return 0;
 }
 
 void enableGPIOforWarning() {
