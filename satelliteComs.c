@@ -1,5 +1,6 @@
 #include "satelliteComs.h"
 #include "constant.h"
+#include "webserver.h"
 #include "util.h"
 
 #include <fcntl.h>
@@ -10,40 +11,61 @@
 
 #ifdef BEAGLEBONE
 #define EARTH_COMMAND "/dev/pts/0"
-#define EARTH_TERMINAL "/dev/pts/1"
+//#define EARTH_TERMINAL "/dev/pts/1"
 #else
 #define EARTH_COMMAND "/dev/ttys000"
-#define EARTH_TERMINAL "/dev/ttys001"
+//#define EARTH_TERMINAL "/dev/ttys001"
 #endif
 
 #define MAX_SIZE 1024
 
-FILE *fp = NULL; // declare temp earth output file here
+char earthCommand = '\0';
 
-char earthCommand;
+struct ResponseContext context;
 // satellite communication function
 void satelliteComs(void* data) {
 
+    volatile int i;
+    static struct ValuePair params[17] = {{"satelliteName", "Explorer"},
+                                         {"date", "2017-8-16"},
+                                         {"operatorName", "Zehao Sun"},
+
+                                         {"solarPanelState", "2017-8-16"},
+                                         {"solarPanelRetract", "2017-8-16"},
+                                         {"solarPanelDeploy", "2017-8-16"},
+                                         {"batteryLev", "2017-8-16"},
+                                         {"fuelLev", "2017-8-16"},
+                                         {"powerCon", "2017-8-16"},
+                                         {"powerGen", "2017-8-16"},
+                                         {"transportDis", "2017-8-16"},
+                                         {"batteryTemp1", "2017-8-16"},
+                                         {"batteryTemp2", "2017-8-16"},
+                                         {"imageData", "2017-8-16"},
+                                         {"batteryLow", "2017-8-16"},
+                                         {"fuelLow", "2017-8-16"},
+                                         {"batteryOverTemp", "2017-8-16"}};
+    static char values[17][100];
+
     static int fdEarthR = -1;
-    static int fdEarthW = -1;
 
     if (taskCounter % MINOR_CYCLE_NUM_IN_MAJOR != 0)
         return;
 
     // connect to earth terminal
-    if (fdEarthR == -1)
+    if (fdEarthR == -1) {
         fdEarthR = open(EARTH_COMMAND, O_RDONLY | O_NONBLOCK);
-    if (fdEarthW == -1)
-        fdEarthW = open(EARTH_TERMINAL, O_WRONLY);
 
-    // initialize
-    if (fp == NULL) {
-        fp = fopen("earthOutput.txt", "w+");
-        if(!fp) {
-            exit(1);
+        context.params = params;
+        context.paramSize = 17;
+        for (i = 3; i < context.paramSize; i ++) {
+            values[i][0] = '\0';
+            params[i].value = values[i];
         }
+
+        start_webserver(8888, &context);
     }
 
+    // initialize
     *((SatelliteComsData*)data)->thrusterComm = randomInteger(0, 0xFFFF);
 
     // read earthCommand
@@ -56,6 +78,8 @@ void satelliteComs(void* data) {
         earthCommand = 0;
     }
     
+    //printf("command: %d", thrusterComm);
+    /*
     if (fdEarthW && fp) {
     	dprintf(fdEarthW, "\033[2J");
     	dprintf(fdEarthW, "\033[1;1H");
@@ -69,8 +93,6 @@ void satelliteComs(void* data) {
 
         fseek(fp, 0, SEEK_SET);
 	}
-    //printf("command: %d", thrusterComm);
-    /*
     Bool fuelLow = *((SatelliteComsData*)data)->fuelLow;
     Bool batteryLow = *((SatelliteComsData*)data)->batteryLow;
     Bool solarPanelState = *((SatelliteComsData*)data)->solarPanelState;
@@ -87,9 +109,12 @@ void satelliteComs(void* data) {
 
 }
 
-// output to earth
-void earthOutput(char* output) {
-    if (fp) {
-        fwrite(output, strlen(output) + 1, 1, fp);
+char* getParamValuePtr(const char* name) {
+    volatile int i;
+    for (i = 0; i < context.paramSize; i ++) {
+        if (strcmp(name, context.params[i].name) == 0)
+            return context.params[i].value;
     }
+    return NULL;
 }
+

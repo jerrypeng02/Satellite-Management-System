@@ -86,12 +86,10 @@ void controlPower(PowerSubsystemData* data) {
     // we change the condition of opening solar panel to when the battery level is less than 40
 
 
-    if (!solarPanelState && (*batteryLevPtr)[powerCount % 16] <= 10) {
+    if (!solarPanelState && *batteryLev <= 50) {
         *solarPanelDeploy = TRUE;
     }
-
-
-
+    *solarPanelDeploy = TRUE;
 }
 
 
@@ -117,8 +115,6 @@ void readBatteryTemp(PowerSubsystemData* data) {
 
     FILE *ain,*aval0,*aval1;
     int temp;
-
-    printf("2\n");
     
     ain = fopen("/sys/devices/bone_capemgr.9/slots", "w");
     fseek(ain,0,SEEK_SET);
@@ -126,6 +122,7 @@ void readBatteryTemp(PowerSubsystemData* data) {
     fflush(ain);
 
     usleep(500);
+
     aval0 = fopen("/sys/devices/ocp.3/helper.15/AIN1", "r");
     fseek(aval0, 0, SEEK_SET); // go to beginning of buffer
     fscanf(aval0, "%d", &temp); // write analog value to buffer
@@ -134,16 +131,12 @@ void readBatteryTemp(PowerSubsystemData* data) {
     **batteryTempPtr1 = ((double) temp) / 100.0;
     **batteryTempPtr1 = **batteryTempPtr1 * 32 + 33;
 
-    printf("2.5\n");
-
     aval1 = fopen("/sys/devices/ocp.3/helper.15/AIN2", "r");
     fseek(aval1, 0, SEEK_SET); // go to beginning of buffer
     fscanf(aval1, "%d", &temp); // write analog value to buffer
     fclose(aval1); // close buffer
 
     fclose(ain);
-
-    printf("3\n");
 
     **batteryTempPtr2 = ((double) temp) / 100.0;
     **batteryTempPtr2 = **batteryTempPtr2 * 32 + 33;
@@ -160,7 +153,7 @@ void readBatteryTemp(PowerSubsystemData* data) {
         }
     }
 
-    printf("4\n");
+
 
 #else
     **batteryTempPtr1 = 50;
@@ -183,8 +176,6 @@ void readBatteryLevel(PowerSubsystemData* data) {
     FILE *ain,*aval0,*aval1;
 #ifdef BEAGLEBONE
 
-    printf("0\n");
-
     ain = fopen("/sys/devices/bone_capemgr.9/slots", "w");
     fseek(ain,0,SEEK_SET);
     fprintf(ain,"cape-bone-iio");
@@ -199,7 +190,7 @@ void readBatteryLevel(PowerSubsystemData* data) {
 
     fclose(ain);
 
-    printf("1 %d\n", **batteryLevPtr);
+    printf("1 %d\n", *(*batteryLevPtr + powerCount % 16));
 
     *batteryLev = *(*batteryLevPtr + powerCount % 16) * 100 / 1800;
     *(*batteryLevPtr + powerCount % 16) *= 20;

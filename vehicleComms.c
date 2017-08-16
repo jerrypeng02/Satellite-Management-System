@@ -10,6 +10,7 @@
 #include <sys/stat.h>
 #include <sys/types.h>
 #include <unistd.h>
+#include <signal.h>
 
 #define MAX_SIZE 1024
 
@@ -61,15 +62,30 @@ void vehicleComms(void* data) {
         if (result == 1) {
             if (buf[0] == 'T') {
                 write(fdw, "K", 1);
-                printf("transport lift-off\n");
+                isrNum = 0;
+                raise(SIGUSR1);
+                printf("Request for transport lift-off\n");
             } else if (buf[0] == 'D') {
                 write(fdw, "C", 1);
-                printf("dock\n");
+                isrNum = 1;
+                raise(SIGUSR1);
+                printf("Request to dock\n");
+            }
+
+            if (buf[0] == 'S') {
+                write(fdw, "W", 1);
+                isrNum = 2;
+                raise(SIGUSR1);
+                printf("Start image capture");
+            } else if (buf[0] == 'I') {
+                write(fdw, "P", 1);
+                isrNum = 3;
+                raise(SIGUSR1);
+                printf("Send image data\n");
             }
         } else {
             *response = 'A';
             buf[result] = '\0';
-            earthOutput(buf);
         }
     }
 }

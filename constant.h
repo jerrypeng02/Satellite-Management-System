@@ -9,13 +9,15 @@
 #ifndef constant_h
 #define constant_h
 
-#define BEAGLEBONE
+//#define BEAGLEBONE
 
 extern const unsigned long MINOR_CYCLE_NUM_IN_MAJOR;
 extern const unsigned long MINOR_CYCLE_MS;
 extern const unsigned long MAJOR_CYCLE_SEC;
 
 extern unsigned long taskCounter;
+
+extern unsigned int isrNum;
 
 extern double batteryTemp1[16];
 extern double batteryTemp2[16];

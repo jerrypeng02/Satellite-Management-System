@@ -5,7 +5,7 @@
 
 // solar panel control function
 void solarPanelControl(void* data);
-
+void enablePWMforSolarPanelControl();
 //
 struct SolarPanelControlDataStruct {
     Bool* solarPanelState;

@@ -10,6 +10,8 @@ void keyBoardConsole(void* data);
 struct KeyBoardConsoleDataStruct {
     Bool* dmsInc;
     Bool* dmsDec;
+    Bool* solarPanelRetract;
+    Bool* solarPanelDeploy;
 };
 
 typedef struct KeyBoardConsoleDataStruct KeyBoardConsoleData;

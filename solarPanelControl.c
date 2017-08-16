@@ -16,7 +16,7 @@ void solarPanelControl(void* data) {
     Bool* dmsInc = ((SolarPanelControlData*)data)->dmsInc;
     Bool* dmsDec = ((SolarPanelControlData*)data)->dmsDec;
 
-    unsigned short motorDrive = 0;
+    static unsigned short motorDrive = 30;
 
 
     if(*dmsInc){
@@ -58,11 +58,9 @@ void solarPanelControl(void* data) {
         *solarPanelRetract = FALSE;
     }
 
-
-
-    int pwm = bbb_enablePwm(HEADER, PIN);
+    printf("motor %d\n", motorDrive);
     int pwmPeriod = bbb_setPwmPeriod(HEADER, PIN, PERIOD);
-    int pwmDuty = bbb_setPwmDuty(HEADER, PIN, motorDrive * PERIOD / 100);
+    int pwmDuty = bbb_setPwmDuty(HEADER, PIN, 30 * (PERIOD / 100));
 
 
 
@@ -91,9 +89,11 @@ void solarPanelControl(void* data) {
 
     solarPanelDeploy = &pwm;
     solarPanelRetract = &pwm;
-<<<<<<< HEAD
     */
 
+}
 
+void enablePWMforSolarPanelControl() {
+    int pwm = bbb_enablePwm(HEADER, PIN);
 }
 

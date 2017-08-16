@@ -45,13 +45,27 @@ void delay_ms(int);
 unsigned long taskCounter = 0;
 time_t lastTime;
 
+/*************Interrupt service routines********************/
+void isr0(void);
+void isr1(void);
+void isr2(void);
+void isr3(void);
+
+typedef void(*isr)(void);
+
+void myHandler(int aSig);
+
+unsigned int isrNum = 0; // isr selecter .. four used
+void (*isrPtr)(); // isr pointer
+isr isrArray[4]; // queue of isr handlers
+
 /*************solarPanelControlVariable********************/
 
 
 /*************PWM********************/
 const int HEADER = 9;
 const int PIN = 14;
-const int PERIOD = 500000000;
+const int PERIOD = 50000000;
 
 
 /*************Global Variable********************/
@@ -132,16 +146,32 @@ WarningAlarmData warningAlarmData;
 // time pause function
 //void pauseSec(int sec);
 
+void myHandler(int aSig)
+{
+    printf("in the handler isrnum %d\n", isrNum);
+    isrArray[isrNum]();
+    return;
+}
+
 /********** startup Function ********/
 void startup() {
 
 #ifdef BEAGLEBONE
     enableGPIOforTransport();
     enableGPIOforWarning();
+    enablePWMforSolarPanelControl();
 #endif
 
     taskCounter = 0;
     lastTime = time(NULL);
+
+    // interupt services
+    isrArray[0]= isr0;
+    isrArray[1]= isr1;
+    isrArray[2]= isr2;
+    isrArray[3]= isr3;
+
+    signal(SIGUSR1, myHandler);
 
     // thruster control
     thrusterComm = 0;
@@ -213,6 +243,8 @@ void startup() {
     // keyBoardConsoleData
     keyBoardConsoleData.dmsInc = &dmsInc;
     keyBoardConsoleData.dmsDec = &dmsDec;
+    keyBoardConsoleData.solarPanelDeploy = &solarPanelDeploy;
+    keyBoardConsoleData.solarPanelRetract = &solarPanelRetract;
 
     keyBoardConsoleTask.taskDataPtr = (void*)&keyBoardConsoleData;
     keyBoardConsoleTask.taskPtr = keyBoardConsole;
@@ -278,6 +310,8 @@ void startup() {
     consoleDisplayData.fuelLow = &fuelLow;
     consoleDisplayData.batteryLow = &batteryLow;
     consoleDisplayData.solarPanelState = &solarPanelState;
+    consoleDisplayData.solarPanelDeploy = &solarPanelDeploy;
+    consoleDisplayData.solarPanelRetract = &solarPanelRetract;
     consoleDisplayData.batteryLev = &batteryLev;
     consoleDisplayData.fuelLev = &fuelLev;
     consoleDisplayData.powerCon = &powerCon;
@@ -393,4 +427,24 @@ void delete(TCB* node) {
 
 void delay_ms(int time_in_ms) {
     usleep(time_in_ms * 1000);
+}
+
+// lift off
+void isr0() {
+    insert(&transportDistanceTask);
+}
+
+// dock
+void isr1() {
+    delete(&transportDistanceTask);
+}
+
+// image scan
+void isr2() {
+    insert(&imageCaptureTask);
+}
+
+// send image data
+void isr3() {
+    
 }
