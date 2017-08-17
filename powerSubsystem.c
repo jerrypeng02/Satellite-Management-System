@@ -2,6 +2,7 @@
 #include "constant.h"
 #include <stdio.h>
 #include <time.h>
+#include <signal.h>
 
 unsigned int powerCount = 0;
 Bool powerIncrease = TRUE;
@@ -45,6 +46,8 @@ void controlPower(PowerSubsystemData* data) {
 
     if(solarPanelState){
         if(*batteryLev > 95){
+            isrNum = 2;
+            signal(SIGUSR1);
             *solarPanelRetract = TRUE;
             *powerGen = 0;
         }else{
@@ -88,6 +91,8 @@ void controlPower(PowerSubsystemData* data) {
 
     if (!solarPanelState && *batteryLev <= 50) {
         *solarPanelDeploy = TRUE;
+        isrNum = 2;
+        signal(SIGUSR1);
     }
     *solarPanelDeploy = TRUE;
 }
@@ -115,7 +120,7 @@ void readBatteryTemp(PowerSubsystemData* data) {
 
     FILE *ain,*aval0,*aval1;
     int temp;
-    
+
     ain = fopen("/sys/devices/bone_capemgr.9/slots", "w");
     fseek(ain,0,SEEK_SET);
     fprintf(ain,"cape-bone-iio");
@@ -142,8 +147,6 @@ void readBatteryTemp(PowerSubsystemData* data) {
     **batteryTempPtr2 = **batteryTempPtr2 * 32 + 33;
 
     if(powerCount > 0) {
-        
-
         if(**batteryTempPtr1 > *(batteryTemp1 + ((*batteryTempPtr1 - batteryTemp1) + 15) % 16) * 1.2){
             *batteryOverTemp = TRUE;
         }else if(**batteryTempPtr2 > *(batteryTemp2 + ((*batteryTempPtr2 - batteryTemp2) + 15) % 16) * 1.2){
@@ -228,5 +231,10 @@ void powerSubsystem(void* data) {
     controlPower((PowerSubsystemData*) data);
 
     powerCount ++;
+
+
 }
+
+
+
 
