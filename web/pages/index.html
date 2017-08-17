@@ -20,9 +20,6 @@
     <!-- Custom CSS -->
     <link href="../dist/css/sb-admin-2.css" rel="stylesheet">
 
-    <!-- Morris Charts CSS -->
-    <link href="../vendor/morrisjs/morris.css" rel="stylesheet">
-
     <!-- Custom Fonts -->
     <link href="../vendor/font-awesome/css/font-awesome.min.css" rel="stylesheet" type="text/css">
 
@@ -472,72 +469,7 @@
             <div class="row">
                 <!-- /.col-lg-6 -->
                 <div class="col-lg-6">
-                    <div class="panel panel-default">
-                        <div class="panel-heading">
-                            <i class="fa fa-bell fa-fw"></i> Status Panel
-                        </div>
-                        <!-- /.panel-heading -->
-                        <div class="panel-body">
-                            <div class="list-group">
-                                <a href="#" class="list-group-item">
-                                    <i class="fa fa-comment fa-fw"></i> Fuel Low
-                                    <span class="pull-right"><em><?fuelLow?></em>
-                                    </span>
-                                </a>
-                                <a href="#" class="list-group-item">
-                                    <i class="fa fa-twitter fa-fw"></i> Battery Low
-                                    <span class="pull-right"><em><?batteryLow?></em>
-                                    </span>
-                                </a>
-                                <a href="#" class="list-group-item">
-                                    <i class="fa fa-envelope fa-fw"></i> Solar Panel State
-                                    <span class="pull-right"><em><?solarPanelState?></em>
-                                    </span>
-                                </a>
-                                <a href="#" class="list-group-item">
-                                    <i class="fa fa-envelope fa-fw"></i> Fuel Level
-                                    <span class="pull-right"><em><?fuelLev?></em>
-                                    </span>
-                                </a>
-                                <a href="#" class="list-group-item">
-                                    <i class="fa fa-bolt fa-fw"></i> Power Consumption
-                                    <span class="pull-right"><em><?powerCon?></em>
-                                    </span>
-                                </a>
-                                <a href="#" class="list-group-item">
-                                    <i class="fa fa-upload fa-fw"></i> Power Generation
-                                    <span class="pull-right"><em><?powerGen?></em>
-                                    </span>
-                                </a>
-                                <a href="#" class="list-group-item">
-                                    <i class="fa fa-warning fa-fw"></i> Battery Level
-                                    <span class="pull-right"><em><?batteryLev?></em>
-                                    </span>
-                                </a>
-                                <a href="#" class="list-group-item">
-                                    <i class="fa fa-shopping-cart fa-fw"></i> Battery Temperature 1
-                                    <span class="pull-right"><em><?batteryTemp1?></em>
-                                    </span>
-                                </a>
-                                <a href="#" class="list-group-item">
-                                    <i class="fa fa-shopping-cart fa-fw"></i> Battery Temperature 2
-                                    <span class="pull-right"><em><?batteryTemp2?></em>
-                                    </span>
-                                </a>
-                                <a href="#" class="list-group-item">
-                                    <i class="fa fa-money fa-fw"></i> Transport Distance
-                                    <span class="pull-right"><em><?transportDis?></em>
-                                    </span>
-                                </a>
-                                <a href="#" class="list-group-item">
-                                    <i class="fa fa-money fa-fw"></i> Image Data
-                                    <span class="pull-right"><em><?imageData?></em>
-                                    </span>
-                                </a>
-                            </div>
-                            <!-- /.list-group -->
-                            <a href="#" class="btn btn-default btn-block">View All Alerts</a>
-                        </div>
+                    <div id="status-panel" class="panel panel-default">
                         <!-- /.panel-body -->
                     </div>
                 </div>
@@ -570,6 +502,34 @@
                         </div>
                         <!-- /.panel-body -->
                     </div>
+
+                    <!-- /.panel -->
+                    <div class="chat-panel panel panel-default">
+                        <div class="panel-heading">
+                            <i class="fa fa-comments fa-fw"></i> Chat
+                        </div>
+                        <!-- /.panel-heading -->
+                        <div id="response-body" class="panel-body">
+                            <?response?>
+                        </div>
+                        <!-- /.panel-body -->
+                        <div class="panel-footer">
+                            <div class="input-group">
+                                <input id="input-command" type="text" class="form-control input-sm" placeholder="Type your command here..." />
+                                <span class="input-group-addon">
+                                    +
+                                </span>
+                                <input id="input-payload" type="text" class="form-control input-sm" placeholder="Type your payload here..." />
+                                <span class="input-group-btn">
+                                    <button class="btn btn-warning btn-sm" id="btn-send">
+                                        Send
+                                    </button>
+                                </span>
+                            </div>
+                        </div>
+                        <!-- /.panel-footer -->
+                    </div>
+                    <!-- /.panel .chat-panel -->
                 </div>
                 <!-- /.col-lg-6 -->
             </div>
@@ -591,8 +551,6 @@
 
     <!-- Morris Charts JavaScript -->
     <script src="../vendor/raphael/raphael.min.js"></script>
-    <script src="../vendor/morrisjs/morris.min.js"></script>
-    <script src="../data/morris-data.js"></script>
 
     <!-- Custom Theme JavaScript -->
     <script src="../dist/js/sb-admin-2.js"></script>

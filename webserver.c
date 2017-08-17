@@ -56,14 +56,10 @@ int processWebpage(char *page, int pageLen, struct ValuePair valuePairs[], int n
         if (end == NULL)
             break;
 
-        printf("%ld %ld\n", start - page, end - page);
-
         if (end - start < 100)
         {
             strncpy(name, start + 2, end - start - 2);
             name[end - start - 2] = '\0';
-            printf("%ld\n", end - start);
-            printf("%s\n", name);
 
             char match = -1;
             for (i = 0; i < numOfPairs; i++)
@@ -142,10 +138,12 @@ ahc_echo(void *cls,
     //printf("received");
 
     int status = 0;
+    char type = '\0';
     /**
      * status -1 = error
-     * status 0 = output buffer
+     * status 0 = unprocessed
      * status 1 = fd file
+     * status 2 = output buffer
      **/
 
     if (NULL != strstr(url, "../"))                         /* Very simplified check! */
@@ -153,13 +151,19 @@ ahc_echo(void *cls,
     else if (strcmp(url, "") == 0 || strcmp(url, "/") == 0) /* homepage */
     {
         sprintf(filename, "web/index.html");
+    } else if (strncmp(url, "/request", 8) == 0) {
+        strncpy(context->command, MHD_lookup_connection_value(connection, MHD_GET_ARGUMENT_KIND, "command"), 50);
+        strncpy(context->payload, MHD_lookup_connection_value(connection, MHD_GET_ARGUMENT_KIND, "payload"), 50);
+        //printf("%s\n", context->command);
+        output = (char *)malloc(10);
+        strncpy(output, "success", 10);
+        status = 2;
     } else {
         sprintf(filename, "web%s", url);
     }
 
-    if (status != -1) {
+    if (status == 0) {
         if (NULL != strstr(filename, ".html")) {
-
 /*
             FILE *logF = fopen("web.log","w");
             fprintf(logF, "%s", filename);
@@ -182,14 +186,16 @@ ahc_echo(void *cls,
                 //fflush(logF);
 
                 free(fstring);
-                status = 0;
+                status = 2;
+                type = 'h';
             } else {
                 status = -1;
                 fd = -1;
             }
             //fclose(logF);
         }
-        else
+        
+        if (status == 0)
         {
             fd = open(filename, O_RDONLY);
 
@@ -214,15 +220,22 @@ ahc_echo(void *cls,
 
     if (status == -1)
     {
+
+        FILE *logF = fopen("web.log","w");
+        fprintf(logF, "%s", url);
+        fflush(logF);
+        fclose(logF);
         fd = open("web/error.html", O_RDONLY);
         status = 1;
     }
 
-    if (status == 0) // if buffer
+    if (status == 2) // if buffer
     {
         response = MHD_create_response_from_buffer(strlen(output),
                                                    (void *)output,
                                                    MHD_RESPMEM_PERSISTENT);
+        if (type == 'h')
+            MHD_add_response_header (response, "Content-Type", "text/html");
         ret = MHD_queue_response(connection, MHD_HTTP_OK, response);
         MHD_destroy_response(response);
         free(output);

@@ -7,6 +7,7 @@
 #include "satelliteComs.h"
 #include "solarPanelControl.h"
 #include "thrusterSubsystem.h"
+#include "commandManagement.h"
 #include "vehicleComms.h"
 #include "warningAlarm.h"
 
@@ -72,8 +73,6 @@ const int PERIOD = 50000000;
 // thruster control
 unsigned int thrusterComm = 0;
 
-
-
 // power management
 unsigned int batteryLevel[16] = {0};
 unsigned int* batteryLevPtr = NULL;
@@ -98,7 +97,7 @@ Bool solarPanelDeploy = FALSE;
 Bool solarPanelRetract = FALSE;
 
 // vehicle communications
-char command = NULL;
+char vehicleCommand = NULL;
 char response = NULL;
 
 // solar panel control
@@ -108,6 +107,9 @@ Bool dmsDec = FALSE;
 // warning alarm
 Bool fuelLow = FALSE;
 Bool batteryLow = FALSE;
+
+// console display
+Bool display = TRUE;
 
 // transport distance
 unsigned long transportDis = 0;
@@ -127,6 +129,9 @@ ThrusterSubsystemData thrusterSubsystemData;
 
 TCB satelliteComsTask;
 SatelliteComsData satelliteComsData;
+
+TCB commandManagementTask;
+CommandManagementData commandManagementData;
 
 TCB vehicleCommsTask;
 VehicleCommsData vehicleCommsData;
@@ -193,7 +198,7 @@ void startup() {
     imageFrequencyPtr = NULL;
 
     // vehicle communications
-    command = NULL;
+    vehicleCommand = NULL;
     response = NULL;
 
     // solar panel control
@@ -203,6 +208,9 @@ void startup() {
     // warning alarm
     fuelLow = FALSE;
     batteryLow = FALSE;
+
+    // display
+    display = TRUE;
 
     // clear TCB
     head = tail = NULL;
@@ -221,6 +229,7 @@ void startup() {
 
     powerSubsystemTask.taskDataPtr = (void*)&powerSubsystemData;
     powerSubsystemTask.taskPtr = powerSubsystem;
+    powerSubsystemTask.priority = 10;
     powerSubsystemTask.next = NULL;
     powerSubsystemTask.prev = NULL;
     insert(&powerSubsystemTask);
@@ -235,6 +244,7 @@ void startup() {
 
     solarPanelControlTask.taskDataPtr = (void*)&solarPanelControlData;
     solarPanelControlTask.taskPtr = solarPanelControl;
+    solarPanelControlTask.priority = 9;
     solarPanelControlTask.next = NULL;
     solarPanelControlTask.prev = NULL;
     insert(&solarPanelControlTask);
@@ -248,6 +258,7 @@ void startup() {
 
     keyBoardConsoleTask.taskDataPtr = (void*)&keyBoardConsoleData;
     keyBoardConsoleTask.taskPtr = keyBoardConsole;
+    keyBoardConsoleTask.priority = 8;
     keyBoardConsoleTask.next = NULL;
     keyBoardConsoleTask.prev = NULL;
     insert(&keyBoardConsoleTask);
@@ -258,6 +269,7 @@ void startup() {
 
     thrusterSubsystemTask.taskDataPtr = (void*)&thrusterSubsystemData;
     thrusterSubsystemTask.taskPtr = thrusterSubsystem;
+    thrusterSubsystemTask.priority = 7;
     thrusterSubsystemTask.next = NULL;
     thrusterSubsystemTask.prev = NULL;
     insert(&thrusterSubsystemTask);
@@ -274,16 +286,29 @@ void startup() {
 
     satelliteComsTask.taskDataPtr = (void*)&satelliteComsData;
     satelliteComsTask.taskPtr = satelliteComs;
+    satelliteComsTask.priority = 11;
     satelliteComsTask.next = NULL;
     satelliteComsTask.prev = NULL;
     insert(&satelliteComsTask);
 
+    commandManagementData.display = &display;
+    commandManagementData.thrusterComm = &thrusterComm;
+    commandManagementData.vehicleCommand = &vehicleCommand;
+
+    commandManagementTask.taskDataPtr = (void*)&commandManagementData;
+    commandManagementTask.taskPtr = commandManagement;
+    commandManagementTask.priority = 6;
+    commandManagementTask.next = NULL;
+    commandManagementTask.prev = NULL;
+    insert(&commandManagementTask);
+
     // VehicleCommsData
-    vehicleCommsData.command = &command;
+    vehicleCommsData.vehicleCommand = &vehicleCommand;
     vehicleCommsData.response = &response;
 
     vehicleCommsTask.taskDataPtr = (void*)&vehicleCommsData;
     vehicleCommsTask.taskPtr = vehicleComms;
+    vehicleCommsTask.priority = 5;
     vehicleCommsTask.next = NULL;
     vehicleCommsTask.prev = NULL;
     insert(&vehicleCommsTask);
@@ -293,6 +318,7 @@ void startup() {
     
     transportDistanceTask.taskDataPtr = (void*)&transportDistanceData;
     transportDistanceTask.taskPtr = transportDistance;
+    transportDistanceTask.priority = 4;
     transportDistanceTask.next = NULL;
     transportDistanceTask.prev = NULL;
     insert(&transportDistanceTask);
@@ -302,11 +328,13 @@ void startup() {
     
     imageCaptureTask.taskDataPtr = (void*)&imageCaptureData;
     imageCaptureTask.taskPtr = imageCapture;
+    imageCaptureTask.priority = 3;
     imageCaptureTask.next = NULL;
     imageCaptureTask.prev = NULL;
     insert(&imageCaptureTask);
 
     // ConsoleDisplayData
+    consoleDisplayData.display = &display;
     consoleDisplayData.fuelLow = &fuelLow;
     consoleDisplayData.batteryLow = &batteryLow;
     consoleDisplayData.solarPanelState = &solarPanelState;
@@ -324,6 +352,7 @@ void startup() {
 
     consoleDisplayTask.taskDataPtr = (void*)&consoleDisplayData;
     consoleDisplayTask.taskPtr = consoleDisplay;
+    consoleDisplayTask.priority = 2;
     consoleDisplayTask.next = NULL;
     consoleDisplayTask.prev = NULL;
     insert(&consoleDisplayTask);
@@ -337,6 +366,7 @@ void startup() {
 
     warningAlarmTask.taskDataPtr = (void*)&warningAlarmData;
     warningAlarmTask.taskPtr = warningAlarm;
+    warningAlarmTask.priority = 1;
     warningAlarmTask.next = NULL;
     warningAlarmTask.prev = NULL;
     insert(&warningAlarmTask);
@@ -354,7 +384,7 @@ int main(void) {
     while (1) {
         tcbPtr = head;
         int t = 0;
-        if ((solarPanelState && !solarPanelDeploy) || 
+        /*if ((solarPanelState && !solarPanelDeploy) || 
                 (!solarPanelState && !solarPanelRetract)) {
             if (append==1) {
                 printf("Appending solar and keyboard\n");
@@ -367,9 +397,9 @@ int main(void) {
             delete(&solarPanelControlTask);
             delete(&keyBoardConsoleTask);
             append = 1;
-        }  
+        } */ 
         while (tcbPtr != NULL) {
-            //printf("%d\n", t ++);
+            //printf("%d\n", tcbPtr->priority);
             tcbPtr->taskPtr((tcbPtr->taskDataPtr));
             tcbPtr = tcbPtr -> next;
         }
@@ -383,21 +413,31 @@ int main(void) {
 // Insert function
 // Arguments: Pointer to TCB node
 // Returns: void
-// Function: Adds the TCB node to the end of the list and updates head and tail pointers
-// This function assumes that head and tail pointers have already been created
-// and are global and that the pointers contained in the TCB node have already been initialized to NULL
-// This function also assumes that the “previous” and “next” pointers in the TCB node are called “prev”
-// and “next” respectively
+// Function: Adds the TCB node and sort queue by priority
 void insert(TCB* node) {
-    if(NULL == head) { // If the head pointer is pointing to nothing
-        head = node; // set the head and tail pointers to point to this node
-        tail = node;
+    TCB* current = tail;
+    while (current != NULL && current->priority < node->priority) {
+        current = current->prev;
     }
-    else { // otherwise, head is not NULL, add the node to the end of the list
-        tail -> next = node;
-        node -> prev = tail; // note that the tail pointer is still pointing
-        // to the prior last node at this point
-        tail = node; // update the tail pointer
+
+    if (current != NULL) {
+        node->prev = current;
+        if (current->next != NULL) {
+            node->next = current->next;
+            current->next->prev = node;
+        }
+        current->next = node;
+    } else {
+        node->prev = NULL;
+        node->next = head;
+        if (head != NULL)
+            head->prev = node;
+        head = node;
+    }
+
+    if(tail == current) {
+        tail = node;
+        node->next = NULL;
     }
     return;
 }

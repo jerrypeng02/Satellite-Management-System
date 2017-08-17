@@ -8,10 +8,11 @@ void commandManagement(void* data);
 
 //
 struct CommandManagementDataStruct {
-    char* command;
+    Bool* display;
+    unsigned int* thrusterComm;
+    char* vehicleCommand;
 };
 typedef struct CommandManagementDataStruct CommandManagementData;
-
 
 #endif /* consoleDisplay_h */
 

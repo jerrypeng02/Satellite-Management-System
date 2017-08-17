@@ -16,11 +16,13 @@ struct SatelliteComsDataStruct {
 };
 typedef struct SatelliteComsDataStruct SatelliteComsData;
 
-extern char earthCommand;
 
 // satellite communication function
 void satelliteComs(void* data);
 
 char* getParamValuePtr(const char* name);
+char* getEarthCommand();
+char* getEarthPayload();
+void clearEarthCommand();
 
 #endif /* satelliteComs_h */

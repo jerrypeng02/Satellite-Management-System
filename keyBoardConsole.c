@@ -21,12 +21,12 @@ void keyBoardConsole(void* data) {
     Bool solarPanelRetract = *((KeyBoardConsoleData*)data)->solarPanelRetract;
 
     if (solarPanelRetract || solarPanelDeploy) {
-        if(earthCommand == 'i') {
+        if(*getEarthCommand() == 'i') {
             *dmsInc = TRUE;
         } else {
             *dmsInc = FALSE;
         }
-        if(earthCommand == 'd') {
+        if(*getEarthCommand() == 'd') {
             *dmsDec = TRUE;
         } else {
             *dmsDec = FALSE;

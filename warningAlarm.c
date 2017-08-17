@@ -70,7 +70,7 @@ void warningAlarm(void* data) {
     if (startCounter > 0) {
         // in 15 sec
         if (taskCounter - startCounter < MINOR_CYCLE_NUM_IN_MAJOR * 3) {
-            if (earthCommand == 'a') {
+            if (*getEarthCommand() == 'a') {
                 startCounter = 0;
                 run = fopen("/sys/devices/ocp.3/pwm_test_P9_19.17/run", "w");
                 fseek(run,0,SEEK_SET);

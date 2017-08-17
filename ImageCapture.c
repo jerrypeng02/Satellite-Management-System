@@ -44,7 +44,7 @@ void imageCapture(void* data) {
         y[i] = 0;
 
         // 1,000,000 / 35 / 256 = 111 us
-        usleep(400);
+        usleep(130);
     }
     fclose(ain);
 
@@ -61,7 +61,7 @@ void imageCapture(void* data) {
         }
     }*/
 
-    frequency = 35 * maxF; 
+    frequency = 7500 * maxF / 256; 
 
 #else
     frequency = 1000;

@@ -1,5 +1,4 @@
 #include "vehicleComms.h"
-#include "satelliteComs.h"
 #include "constant.h"
 #include "pipeCommons.h"
 
@@ -34,7 +33,7 @@ void vehicleComms(void* data) {
 
     char buf[MAX_SIZE];
 
-    char *command = ((VehicleCommsData*)data)->command;
+    char *command = ((VehicleCommsData*)data)->vehicleCommand;
     char *response = ((VehicleCommsData*)data)->response;
     
         // F Forward
@@ -43,16 +42,14 @@ void vehicleComms(void* data) {
         // R Right
         // D Drill down – Start
         // H Drill up – Stop
-    
-    
-    if (earthCommand == 'F' ||
-            earthCommand == 'B' ||
-            earthCommand == 'L' ||
-            earthCommand == 'R' ||
-            earthCommand == 'D' ||
-            earthCommand == 'H') {
-        *command = earthCommand;
-        earthCommand = 0;
+
+    if (*command == 'F' ||
+            *command  == 'B' ||
+            *command  == 'L' ||
+            *command  == 'R' ||
+            *command  == 'D' ||
+            *command  == 'H') {
+        *command = '\0';
 
         write(fdw, command, 1);
         //close(fd0); // close the FIFO

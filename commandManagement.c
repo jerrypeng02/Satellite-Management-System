@@ -1,10 +1,87 @@
 #include "commandManagement.h"
+#include "satelliteComs.h"
 #include "constant.h"
 
+#include <string.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>
+#include <signal.h>
 
+void commandManagement(void* data) {
+    CommandManagementData* commandManagementData = (CommandManagementData*) data;
+
+    char *response = getParamValuePtr("response");
+    char *value;
+
+    if (*getEarthCommand() != 0)
+        printf("EarthCommand: %c\n", *getEarthCommand());
+
+    switch(*getEarthCommand()) {
+        case 'S':
+        //start measurement
+            isrNum = 0;
+            raise(SIGUSR1);
+            isrNum = 2;
+            raise(SIGUSR1);
+            response[0] = 'A';
+            response[1] = '\0';
+            break;
+        case 'P':
+        //stop measurement
+            isrNum = 1;
+            raise(SIGUSR1);
+            isrNum = 3;
+            raise(SIGUSR1);
+            response[0] = 'A';
+            response[1] = '\0';
+            break;
+        case 'D':
+        // toggle Display
+            *commandManagementData->display = !*commandManagementData->display;
+            response[0] = 'A';
+            response[1] = '\0';
+            break;
+        case 'T':
+            // thrust command
+            if (sscanf(getEarthPayload(), "%d", commandManagementData->thrusterComm) == 1) {
+                response[0] = 'A';
+                response[1] = '\0';
+            } else {
+                response[0] = 'E';
+                response[1] = '\0';
+            }
+            break;
+        case 'M':
+            // display specific value
+            value = getParamValuePtr(getEarthPayload());
+
+            if (value != NULL) {
+                response[0] = 'A';
+                strncpy(response + 1, value, 100);
+            } else {
+                response[0] = 'E';
+                response[1] = '\0';
+            }
+            break;
+        case 'V':
+            if (*getEarthPayload()) {
+                *commandManagementData->vehicleCommand = *getEarthPayload();
+                response[0] = 'A';
+                response[1] = '\0';
+            } else {
+                response[0] = 'E';
+                response[1] = '\0';
+            }
+        case '\0':
+            break;
+        default:
+            response[0] = 'E';
+            response[1] = '\0';
+            break;
+    }
+    clearEarthCommand();
+}
 /**
 S
 The S command indicates START mode. The command shall start the embedded

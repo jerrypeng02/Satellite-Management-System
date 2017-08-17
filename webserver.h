@@ -9,6 +9,8 @@ struct ValuePair {
 struct ResponseContext {
     struct ValuePair *params;
     unsigned int paramSize;
+    char* command;
+    char* payload;
 };
 
 int processWebpage(char *page, int pageLen, struct ValuePair *valuePairs, int numOfPairs, char* output);

@@ -6,7 +6,7 @@ void vehicleComms(void* data);
 
 //
 struct VehicleCommsDataStruct {
-    char* command;
+    char* vehicleCommand;
     char* response;
 };
 

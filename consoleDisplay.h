@@ -8,6 +8,7 @@ void consoleDisplay(void* data);
 
 //
 struct ConsoleDisplayDataStruct {
+    Bool* display;
     Bool* fuelLow;
     Bool* batteryLow;
     Bool* solarPanelState;
