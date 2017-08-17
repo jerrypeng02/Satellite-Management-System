@@ -76,12 +76,11 @@ void warningAlarm(void* data) {
                 fflush(run);
                 fclose(run);
             } else {
-                // gpioW = fopen("/sys/class/gpio/gpio7/value", "w");
-                // fseek(gpioW,0,SEEK_SET);
-                // fprintf(gpioW,"1");
-                // fflush(gpioW);
-                // fclose(gpioW);
-                enablePWM();
+                gpioW = fopen("/sys/class/gpio/gpio7/value", "w");
+                fseek(gpioW,0,SEEK_SET);
+                fprintf(gpioW,"1");
+                fflush(gpioW);
+                fclose(gpioW);
             }
         } else {
             // after 15 sec
@@ -161,44 +160,6 @@ void warningAlarm(void* data) {
         fclose(led);
     }
 }
-/*
-void enablePWM() {
-    FILE *pwm,*duty,*period,*run;
-    
-        pwm = fopen("/sys/devices/bone_capemgr.9/slots", "w");
-        fseek(pwm,0,SEEK_SET);
-        fprintf(pwm,"am33xx_pwm");
-        fflush(pwm);
-        
-        fprintf(pwm,"bone_pwm_P9_16");
-        fflush(pwm);
-    
-        period = fopen("/sys/devices/ocp.3/pwm_test_P9_16.17/period", "w");
-        fseek(period,0,SEEK_SET);
-        fprintf(period,"%d",200000000);
-        fflush(period);
-    
-        duty = fopen("/sys/devices/ocp.3/pwm_test_P9_16.17/duty", "w");
-        fseek(duty,0,SEEK_SET);
-        fprintf(duty,"%d",100000000);
-        fflush(duty);
-    
-        run = fopen("/sys/devices/ocp.3/pwm_test_P9_19.17/run", "w");
-        fseek(run,0,SEEK_SET);
-        fprintf(run,"%d",1);
-        fflush(run);
-    
-        // fseek(run,0,SEEK_SET);
-        // fprintf(run,"%d",1);
-        // fflush(run);
-        // while(1);
-    
-        fclose(pwm);
-        fclose(duty);
-        fclose(period);
-        fclose(run);
-        //return 0;
-}*/
 
 void enableGPIOforWarning() {
     FILE* gpioE = fopen("/sys/class/gpio/export", "w");
