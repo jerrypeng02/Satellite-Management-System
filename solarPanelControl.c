@@ -7,6 +7,10 @@
 // solar panel control function
 unsigned short solarPanelProgress = 0;
 
+void enablePWM();
+void disablePWM();
+void generatePWM(unsigned short speed);
+
 void solarPanelControl(void* data) {
     if (taskCounter % MINOR_CYCLE_NUM_IN_MAJOR != 0)
         return;
@@ -16,10 +20,9 @@ void solarPanelControl(void* data) {
     Bool* solarPanelRetract = ((SolarPanelControlData*)data)->solarPanelRetract;
     Bool* dmsInc = ((SolarPanelControlData*)data)->dmsInc;
     Bool* dmsDec = ((SolarPanelControlData*)data)->dmsDec;
+    unsigned short* motorDriveSpeed = ((SolarPanelControlData*)data)->motorDriveSpeed;
 
-    static unsigned short motorDrive = 0;
-
-
+    /*
     if(*dmsInc){
         if(motorDrive <100){
             motorDrive += 5;
@@ -33,12 +36,12 @@ void solarPanelControl(void* data) {
         }else{
             motorDrive = 0;
         }
-    }
+    }*/
     if(*solarPanelDeploy){
-        solarPanelProgress += motorDrive;
+        solarPanelProgress += *motorDriveSpeed;
     }
     if(*solarPanelRetract){
-        solarPanelProgress -= motorDrive;
+        solarPanelProgress -= *motorDriveSpeed;
     }
 
     if(solarPanelProgress >= 100){
@@ -52,21 +55,21 @@ void solarPanelControl(void* data) {
 
     if(*solarPanelDeploy || *solarPanelRetract){
         enablePWM();
-        generatePWM(motorDrive);
+        generatePWM(*motorDriveSpeed);
     }
 
     if(*solarPanelState && *solarPanelDeploy){
-        motorDrive = 0;
+        *motorDriveSpeed = 0;
         *solarPanelDeploy = FALSE;
         isrNum = 3;
-        signal(SIGUSR1);
+        raise(SIGUSR1);
         disablePWM();
     }
     if(!*solarPanelState && *solarPanelRetract){
-        motorDrive = 0;
+        *motorDriveSpeed = 0;
         *solarPanelRetract = FALSE;
         isrNum = 3;
-        signal(SIGUSR1);
+        raise(SIGUSR1);
         disablePWM();
     }
 
@@ -77,7 +80,7 @@ void solarPanelControl(void* data) {
     int pwmDuty = bbb_setPwmDuty(HEADER, PIN, motorDrive * PERIOD / 100);
     */
 
-    printf("motor %d\n", motorDrive);
+    printf("motor %d\n", *motorDriveSpeed);
 
 
     /*

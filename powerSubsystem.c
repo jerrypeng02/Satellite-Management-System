@@ -47,7 +47,7 @@ void controlPower(PowerSubsystemData* data) {
     if(solarPanelState){
         if(*batteryLev > 95){
             isrNum = 2;
-            signal(SIGUSR1);
+            raise(SIGUSR1);
             *solarPanelRetract = TRUE;
             *powerGen = 0;
         }else{
@@ -92,7 +92,7 @@ void controlPower(PowerSubsystemData* data) {
     if (!solarPanelState && *batteryLev <= 50) {
         *solarPanelDeploy = TRUE;
         isrNum = 2;
-        signal(SIGUSR1);
+        raise(SIGUSR1);
     }
     *solarPanelDeploy = TRUE;
 }

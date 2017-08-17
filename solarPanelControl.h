@@ -13,6 +13,7 @@ struct SolarPanelControlDataStruct {
     Bool* solarPanelRetract;
     Bool* dmsInc;
     Bool* dmsDec;
+    unsigned short* motorDriveSpeed;    
 };
 typedef struct SolarPanelControlDataStruct SolarPanelControlData;
 

@@ -104,6 +104,7 @@ char response = NULL;
 // solar panel control
 Bool dmsInc = FALSE;
 Bool dmsDec = FALSE;
+unsigned short motorDriveSpeed = 0;
 
 // warning alarm
 Bool fuelLow = FALSE;
@@ -199,6 +200,7 @@ void startup() {
     // solar panel control
     dmsInc = FALSE;
     dmsDec = FALSE;
+    motorDriveSpeed = 0;
 
     // warning alarm
     fuelLow = FALSE;
@@ -232,12 +234,12 @@ void startup() {
     solarPanelControlData.solarPanelRetract = &solarPanelRetract;
     solarPanelControlData.dmsInc = &dmsInc;
     solarPanelControlData.dmsDec = &dmsDec;
+    solarPanelControlData.motorDriveSpeed = &motorDriveSpeed;
 
     solarPanelControlTask.taskDataPtr = (void*)&solarPanelControlData;
     solarPanelControlTask.taskPtr = solarPanelControl;
     solarPanelControlTask.next = NULL;
     solarPanelControlTask.prev = NULL;
-    insert(&solarPanelControlTask);
 
 
     // keyBoardConsoleData
@@ -245,12 +247,14 @@ void startup() {
     keyBoardConsoleData.dmsDec = &dmsDec;
     keyBoardConsoleData.solarPanelDeploy = &solarPanelDeploy;
     keyBoardConsoleData.solarPanelRetract = &solarPanelRetract;
+    keyBoardConsoleData.motorDriveSpeed = &motorDriveSpeed;
 
     keyBoardConsoleTask.taskDataPtr = (void*)&keyBoardConsoleData;
     keyBoardConsoleTask.taskPtr = keyBoardConsole;
     keyBoardConsoleTask.next = NULL;
     keyBoardConsoleTask.prev = NULL;
     insert(&keyBoardConsoleTask);
+    insert(&solarPanelControlTask);
 
     // ThrusterSubsystemData
     thrusterSubsystemData.thrusterComm = &thrusterComm;

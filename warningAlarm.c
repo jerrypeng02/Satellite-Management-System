@@ -29,8 +29,6 @@
 #define OUTPUT_LED3 "led3.txt"
 #endif
 
-void enablePWM();
-
 // warning alarm function
 void warningAlarm(void* data) {
     
@@ -163,7 +161,7 @@ void warningAlarm(void* data) {
         fclose(led);
     }
 }
-
+/*
 void enablePWM() {
     FILE *pwm,*duty,*period,*run;
     
@@ -200,7 +198,7 @@ void enablePWM() {
         fclose(period);
         fclose(run);
         //return 0;
-}
+}*/
 
 void enableGPIOforWarning() {
     FILE* gpioE = fopen("/sys/class/gpio/export", "w");
