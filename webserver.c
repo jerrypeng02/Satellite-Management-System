@@ -56,14 +56,10 @@ int processWebpage(char *page, int pageLen, struct ValuePair valuePairs[], int n
         if (end == NULL)
             break;
 
-        printf("%ld %ld\n", start - page, end - page);
-
         if (end - start < 100)
         {
             strncpy(name, start + 2, end - start - 2);
             name[end - start - 2] = '\0';
-            printf("%ld\n", end - start);
-            printf("%s\n", name);
 
             char match = -1;
             for (i = 0; i < numOfPairs; i++)
