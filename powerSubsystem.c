@@ -119,7 +119,7 @@ void readBatteryTemp(PowerSubsystemData* data) {
     int temp;
 
     printf("2\n");
-    
+
     ain = fopen("/sys/devices/bone_capemgr.9/slots", "w");
     fseek(ain,0,SEEK_SET);
     fprintf(ain,"cape-bone-iio");
@@ -149,8 +149,6 @@ void readBatteryTemp(PowerSubsystemData* data) {
     **batteryTempPtr2 = **batteryTempPtr2 * 32 + 33;
 
     if(powerCount > 0) {
-        
-
         if(**batteryTempPtr1 > *(batteryTemp1 + ((*batteryTempPtr1 - batteryTemp1) + 15) % 16) * 1.2){
             *batteryOverTemp = TRUE;
         }else if(**batteryTempPtr2 > *(batteryTemp2 + ((*batteryTempPtr2 - batteryTemp2) + 15) % 16) * 1.2){
@@ -237,5 +235,10 @@ void powerSubsystem(void* data) {
     controlPower((PowerSubsystemData*) data);
 
     powerCount ++;
+
+
 }
+
+
+
 
