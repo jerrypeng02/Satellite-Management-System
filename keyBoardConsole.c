@@ -15,21 +15,17 @@ void keyBoardConsole(void* data) {
     if (taskCounter % MINOR_CYCLE_NUM_IN_MAJOR * 2 / 5 != 0)
         return;
 
-    Bool* dmsInc = ((KeyBoardConsoleData*)data)->dmsInc;
-    Bool* dmsDec = ((KeyBoardConsoleData*)data)->dmsDec;
-    Bool solarPanelDeploy = *((KeyBoardConsoleData*)data)->solarPanelDeploy;
-    Bool solarPanelRetract = *((KeyBoardConsoleData*)data)->solarPanelRetract;
+    Bool *solarPanelDeploy = ((KeyBoardConsoleData*)data)->solarPanelDeploy;
+    Bool *solarPanelRetract = ((KeyBoardConsoleData*)data)->solarPanelRetract;
+    unsigned short *motorDriveSpeed = ((KeyBoardConsoleData*)data)->motorDriveSpeed;
 
-    if (solarPanelRetract || solarPanelDeploy) {
+    if (*solarPanelRetract || *solarPanelDeploy) {
         if(*getEarthCommand() == 'i') {
-            *dmsInc = TRUE;
-        } else {
-            *dmsInc = FALSE;
-        }
-        if(*getEarthCommand() == 'd') {
-            *dmsDec = TRUE;
-        } else {
-            *dmsDec = FALSE;
+            *motorDriveSpeed += 5;
+            clearEarthCommand();
+        } else if(*getEarthCommand() == 'd') {
+            *motorDriveSpeed -= 5;
+            clearEarthCommand();
         }
     }
 }

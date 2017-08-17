@@ -12,6 +12,7 @@ struct KeyBoardConsoleDataStruct {
     Bool* dmsDec;
     Bool* solarPanelRetract;
     Bool* solarPanelDeploy;
+    unsigned short* motorDriveSpeed;
 };
 
 typedef struct KeyBoardConsoleDataStruct KeyBoardConsoleData;

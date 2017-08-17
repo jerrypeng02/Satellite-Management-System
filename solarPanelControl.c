@@ -2,9 +2,14 @@
 #include "constant.h"
 #include "stdio.h"
 #include "bbb.h"
+#include <signal.h>
 
 // solar panel control function
 unsigned short solarPanelProgress = 0;
+
+void enablePWM();
+void disablePWM();
+void generatePWM(unsigned short speed);
 
 void solarPanelControl(void* data) {
     if (taskCounter % MINOR_CYCLE_NUM_IN_MAJOR != 0)
@@ -15,10 +20,9 @@ void solarPanelControl(void* data) {
     Bool* solarPanelRetract = ((SolarPanelControlData*)data)->solarPanelRetract;
     Bool* dmsInc = ((SolarPanelControlData*)data)->dmsInc;
     Bool* dmsDec = ((SolarPanelControlData*)data)->dmsDec;
+    unsigned short* motorDriveSpeed = ((SolarPanelControlData*)data)->motorDriveSpeed;
 
-    static unsigned short motorDrive = 30;
-
-
+    /*
     if(*dmsInc){
         if(motorDrive <100){
             motorDrive += 5;
@@ -32,12 +36,12 @@ void solarPanelControl(void* data) {
         }else{
             motorDrive = 0;
         }
-    }
+    }*/
     if(*solarPanelDeploy){
-        solarPanelProgress += motorDrive;
+        solarPanelProgress += *motorDriveSpeed;
     }
     if(*solarPanelRetract){
-        solarPanelProgress -= motorDrive;
+        solarPanelProgress -= *motorDriveSpeed;
     }
 
     if(solarPanelProgress >= 100){
@@ -49,18 +53,35 @@ void solarPanelControl(void* data) {
         solarPanelProgress = 0;
     }
 
-    if(*solarPanelState && *solarPanelDeploy){
-        motorDrive = 0;
-        *solarPanelDeploy = FALSE;
-    }
-    if(!*solarPanelState && *solarPanelRetract){
-        motorDrive = 0;
-        *solarPanelRetract = FALSE;
+    if(*solarPanelDeploy || *solarPanelRetract){
+        enablePWM();
+        generatePWM(*motorDriveSpeed);
     }
 
-    printf("motor %d\n", motorDrive);
+    if(*solarPanelState && *solarPanelDeploy){
+        *motorDriveSpeed = 0;
+        *solarPanelDeploy = FALSE;
+        isrNum = 3;
+        raise(SIGUSR1);
+        disablePWM();
+    }
+    if(!*solarPanelState && *solarPanelRetract){
+        *motorDriveSpeed = 0;
+        *solarPanelRetract = FALSE;
+        isrNum = 3;
+        raise(SIGUSR1);
+        disablePWM();
+    }
+
+
+    /*
+    int pwm = bbb_enablePwm(HEADER, PIN);
     int pwmPeriod = bbb_setPwmPeriod(HEADER, PIN, PERIOD);
-    int pwmDuty = bbb_setPwmDuty(HEADER, PIN, 30 * (PERIOD / 100));
+    int pwmDuty = bbb_setPwmDuty(HEADER, PIN, motorDrive * PERIOD / 100);
+    */
+
+    printf("motor %d\n", *motorDriveSpeed);
+
 
     /*
     Bool pwm;
@@ -92,6 +113,59 @@ void solarPanelControl(void* data) {
 }
 
 void enablePWMforSolarPanelControl() {
-    int pwm = bbb_enablePwm(HEADER, PIN);
+#ifdef BEAGLEBONE
+    FILE *pwm;
+	pwm = fopen("/sys/devices/bone_capemgr.9/slots", "w");
+	fseek(pwm,0,SEEK_SET);
+	fprintf(pwm,"am33xx_pwm");
+	fflush(pwm);
+
+	fprintf(pwm,"bone_pwm_P9_14");
+	fflush(pwm);
+	fclose(pwm);
+#endif
+}
+
+void generatePWM(unsigned short speed){
+#ifdef BEAGLEBONE
+    FILE *duty,*period;
+
+	period = fopen("/sys/devices/ocp.3/pwm_test_P9_14.16/period", "w");
+	fseek(period,0,SEEK_SET);
+	fprintf(period,"%d",500000000);
+	fflush(period);
+
+	duty = fopen("/sys/devices/ocp.3/pwm_test_P9_14.16/duty", "w");
+	fseek(duty,0,SEEK_SET);
+	fprintf(duty,"%d",speed * (500000000/ 100));
+	fflush(duty);
+
+	fclose(duty);
+	fclose(period);
+#endif
+}
+
+void enablePWM() {
+#ifdef BEAGLEBONE
+    FILE *run;
+	run = fopen("/sys/devices/ocp.3/pwm_test_P9_14.16/run", "w");
+
+	fseek(run,0,SEEK_SET);
+	fprintf(run,"%d",1);
+	fflush(run);
+	fclose(run);
+#endif
+}
+
+void disablePWM(){
+#ifdef BEAGLEBONE
+    FILE *run;
+	run = fopen("/sys/devices/ocp.3/pwm_test_P9_14.16/run", "w");
+
+	fseek(run,0,SEEK_SET);
+	fprintf(run,"%d",0);
+	fflush(run);
+	fclose(run);
+#endif
 }
 

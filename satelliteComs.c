@@ -20,7 +20,7 @@
 
 #define MAX_SIZE 1024
 
-struct ResponseContext context;
+struct ResponseContext context = {0};
 // satellite communication function
 void satelliteComs(void* data) {
 
@@ -55,7 +55,9 @@ void satelliteComs(void* data) {
     // connect to earth terminal
     if (fdEarthR == -1) {
         fdEarthR = open(EARTH_COMMAND, O_RDONLY | O_NONBLOCK);
+    }
 
+    if (context.paramSize == 0) {
         context.params = params;
         context.paramSize = 18;
         context.command = command;

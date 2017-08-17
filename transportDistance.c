@@ -39,6 +39,8 @@ unsigned long readData() {
 
     usleep(90000); // should it be after the for loop?
     
+    //printf("break\n");
+
     for(i = 2; i < 9; i++) {
         gpioC[i] = fopen(pinFile[i], "r");
         fseek(gpioC[i],0,SEEK_SET);
@@ -46,11 +48,11 @@ unsigned long readData() {
         fclose(gpioC[i]); // close buffer
     }
 
-    for(i = 0; i < 7; i++) {
-        //freq[i] = 0;
-        printf("%d", freq[i]);
-    }
-    printf("\n");
+    // for(i = 0; i < 7; i++) {
+    //     //freq[i] = 0;
+    //     printf("%d", freq[i]);
+    // }
+    // printf("\n");
 
     // gpioC[0] = fopen(pinFile[0], "w");
     // fseek(gpioC[0],0,SEEK_SET);
