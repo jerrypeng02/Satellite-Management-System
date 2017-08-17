@@ -193,8 +193,6 @@ void readBatteryLevel(PowerSubsystemData* data) {
 
     fclose(ain);
 
-    printf("1 %d\n", *(*batteryLevPtr + powerCount % 16));
-
     *batteryLev = *(*batteryLevPtr + powerCount % 16) * 100 / 1800;
     *(*batteryLevPtr + powerCount % 16) *= 20;
 

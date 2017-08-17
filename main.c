@@ -413,11 +413,24 @@ int main(void) {
     return EXIT_SUCCESS;
 }
 
+Bool inQueue(TCB* node) {
+    TCB* current = head;
+    while (current != NULL) {
+        if (current == node)
+            return TRUE;
+        current = current->next;
+    }
+    return FALSE;
+}
+
 // Insert function
 // Arguments: Pointer to TCB node
 // Returns: void
 // Function: Adds the TCB node and sort queue by priority
 void insert(TCB* node) {
+    if (inQueue(node))
+        return;
+
     TCB* current = tail;
     while (current != NULL && current->priority < node->priority) {
         current = current->prev;
@@ -448,6 +461,9 @@ void insert(TCB* node) {
 // Delete function
 // Arguments: Pointer to TCB node
 void delete(TCB* node) {
+    if (!inQueue(node))
+        return;
+
     /* If node to be deleted is head node */
     if(head == node)
         head = node->next;
@@ -484,10 +500,10 @@ void isr1() {
 
 // image scan
 void isr2() {
-    insert(&imageCaptureTask);
+    insert(&keyBoardConsoleTask);
 }
 
 // send image data
 void isr3() {
-    
+    delete(&keyBoardConsoleTask);
 }

@@ -82,7 +82,7 @@ unsigned long readData() {
         totalFreq += (1 << i) * freq[i];
     }
 
-    printf("%lu\n", totalFreq);
+    printf("freq: %lu\n", totalFreq);
 
     return totalFreq;
 }

@@ -49,9 +49,8 @@ void vehicleComms(void* data) {
             *command  == 'R' ||
             *command  == 'D' ||
             *command  == 'H') {
-        *command = '\0';
-
         write(fdw, command, 1);
+        *command = '\0';
         //close(fd0); // close the FIFO
         //unlink(myfifo0);
 
