@@ -40,7 +40,7 @@ void imageCapture(void* data) {
 
         fprintf(ftemp, "%d ", x[i]);
 
-        x[i] = (x[i] - 900) / 9;
+        x[i] = x[i] * 64 / 1800 - 32;
         y[i] = 0;
 
         // 1,000,000 / 35 / 256 = 111 us
@@ -51,14 +51,15 @@ void imageCapture(void* data) {
     fprintf(ftemp, "\n", x[i]);
     fclose(ftemp);
 
-    optfft(x, y);
+    maxF = optfft(x, y);
 
+    /*
     for(i = 0; i < 256; i++){
         if (maxA < y[i]) {
             maxA = y[i];
             maxF = 256 - i;
         }
-    }
+    }*/
 
     frequency = 35 * maxF; 
 

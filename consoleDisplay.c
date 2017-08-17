@@ -11,12 +11,12 @@
 // console display function
 void consoleDisplay(void* data) {
 
-    static int mode = 0;
+    //static int mode = 0;
     //printf("%c", earthCommand);
-    if (earthCommand == 't') {
+    /*if (earthCommand == 't') {
         mode = 1 - mode;
         earthCommand = 0;
-    }
+    }*/
 
     if (*((ConsoleDisplayData*)data)->batteryLev < 15)
         *((ConsoleDisplayData*)data)->batteryLow = TRUE;
@@ -27,31 +27,18 @@ void consoleDisplay(void* data) {
     else
         *((ConsoleDisplayData*)data)->fuelLow = FALSE;
 
-    char output[MAX_SIZE];
-    if (mode == 0) {
-        sprintf(output, "Solar Panel State: %d\n"
-                        "Battery Level: %d\n"
-                        "Fuel Level: %d\n"
-                        "Power consumption: %d\n"
-                        "Transport Distance: %lu\n"
-                        "Battery temperature 1 is %lf\n"
-                        "Battery temperature 2 is %lf\n"
-                        "Image frequency: %d\n",
-                *((ConsoleDisplayData*)data)->solarPanelState,
-                *((ConsoleDisplayData*)data)->batteryLev,
-                *((ConsoleDisplayData*)data)->fuelLev,
-                *((ConsoleDisplayData*)data)->powerCon,
-                *((ConsoleDisplayData*)data)->transportDis,
-                **((ConsoleDisplayData*)data)->batteryTempPtr1,
-                **((ConsoleDisplayData*)data)->batteryTempPtr2,
-                **((ConsoleDisplayData*)data)->imageFrequencyPtr);
-    } else {
-        sprintf(output, "Battery Level is %s\n"
-                        "Fuel Level is %s\n"
-                        "Battery Tempature is %s\n",
-                *((ConsoleDisplayData*)data)->batteryLow? "low" : "normal",
-                *((ConsoleDisplayData*)data)->fuelLow? "low" : "normal",
-                *((ConsoleDisplayData*)data)->batteryOverTemp? "too high" : "normal");
-    }
-    earthOutput(output);
+    sprintf(getParamValuePtr("solarPanelState"), "%s", *((ConsoleDisplayData*)data)->solarPanelState ? "Deployed" : "Retracted");
+    sprintf(getParamValuePtr("solarPanelRetract"), "%s", *((ConsoleDisplayData*)data)->solarPanelRetract ? "Yes" : "No");
+    sprintf(getParamValuePtr("solarPanelDeploy"), "%s", *((ConsoleDisplayData*)data)->solarPanelDeploy ? "Yes" : "No");
+    sprintf(getParamValuePtr("batteryLev"), "%d", *((ConsoleDisplayData*)data)->batteryLev);
+    sprintf(getParamValuePtr("fuelLev"), "%d", *((ConsoleDisplayData*)data)->fuelLev);
+    sprintf(getParamValuePtr("powerCon"), "%d", *((ConsoleDisplayData*)data)->powerCon);
+    sprintf(getParamValuePtr("powerGen"), "%d", *((ConsoleDisplayData*)data)->powerGen);
+    sprintf(getParamValuePtr("transportDis"), "%lu", *((ConsoleDisplayData*)data)->transportDis);
+    sprintf(getParamValuePtr("batteryTemp1"), "%lf", **((ConsoleDisplayData*)data)->batteryTempPtr1);
+    sprintf(getParamValuePtr("batteryTemp2"), "%lf", **((ConsoleDisplayData*)data)->batteryTempPtr2);
+    sprintf(getParamValuePtr("imageData"), "%d", **((ConsoleDisplayData*)data)->imageFrequencyPtr);
+    sprintf(getParamValuePtr("batteryLow"), "%s", *((ConsoleDisplayData*)data)->batteryLow ? "low" : "normal");
+    sprintf(getParamValuePtr("fuelLow"), "%s", *((ConsoleDisplayData*)data)->fuelLow ? "low" : "normal");
+    sprintf(getParamValuePtr("batteryOverTemp"), "%s", *((ConsoleDisplayData*)data)->batteryOverTemp ? "too high" : "normal");
 }

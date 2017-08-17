@@ -15,21 +15,21 @@ void keyBoardConsole(void* data) {
     if (taskCounter % MINOR_CYCLE_NUM_IN_MAJOR * 2 / 5 != 0)
         return;
 
-    Bool dmsInc = *((KeyBoardConsoleData*)data)->dmsInc;
-    Bool dmsDec = *((KeyBoardConsoleData*)data)->dmsDec;
-    Bool solarPanelDeploy = *((SolarPanelControlData*)data)->solarPanelDeploy;
-    Bool solarPanelRetract = *((SolarPanelControlData*)data)->solarPanelRetract;
+    Bool* dmsInc = ((KeyBoardConsoleData*)data)->dmsInc;
+    Bool* dmsDec = ((KeyBoardConsoleData*)data)->dmsDec;
+    Bool solarPanelDeploy = *((KeyBoardConsoleData*)data)->solarPanelDeploy;
+    Bool solarPanelRetract = *((KeyBoardConsoleData*)data)->solarPanelRetract;
 
     if (solarPanelRetract || solarPanelDeploy) {
         if(earthCommand == 'i') {
-            dmsInc = TRUE;
+            *dmsInc = TRUE;
         } else {
-            dmsInc = FALSE;
+            *dmsInc = FALSE;
         }
         if(earthCommand == 'd') {
-            dmsDec = TRUE;
+            *dmsDec = TRUE;
         } else {
-            dmsDec = FALSE;
+            *dmsDec = FALSE;
         }
     }
 }

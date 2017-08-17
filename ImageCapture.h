@@ -8,6 +8,4 @@ struct ImageCaptureDataStruct {
 };
 typedef struct ImageCaptureDataStruct ImageCaptureData;
 
-typedef struct ImageCaptureDataStruct ImageCaptureData;
-
 #endif /* imageCapture_h */

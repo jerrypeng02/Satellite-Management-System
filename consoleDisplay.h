@@ -11,6 +11,8 @@ struct ConsoleDisplayDataStruct {
     Bool* fuelLow;
     Bool* batteryLow;
     Bool* solarPanelState;
+    Bool* solarPanelRetract;
+    Bool* solarPanelDeploy;
     unsigned short* batteryLev;
     unsigned short* fuelLev;
     unsigned short* powerCon;

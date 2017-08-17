@@ -21,8 +21,6 @@ extern char earthCommand;
 // satellite communication function
 void satelliteComs(void* data);
 
-// output to earth
-void earthOutput(char* output);
-
+char* getParamValuePtr(const char* name);
 
 #endif /* satelliteComs_h */
