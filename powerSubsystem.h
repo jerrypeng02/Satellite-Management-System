@@ -22,4 +22,6 @@ struct PowerSubsystemDataStruct {
 typedef struct PowerSubsystemDataStruct PowerSubsystemData;
 
 
+void enableADCforPowerSystem();
+
 #endif /* powerSubsystem_h */

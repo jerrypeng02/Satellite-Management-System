@@ -9,7 +9,7 @@ OBJ = main.o bbb.o optfft.o consoleDisplay.o keyBoardConsole.o powerSubsystem.o 
 	$(CC) -c $< -o $@ $(CFLAGS)
 
 vehicle_main: vehicle_main.o
-	$(CC) -o $@ $^ $(CFLAGS)
+	$(CC) -o $@ $^ $(CFLAGS) -pthread
 
 webserver_main: webserver_main.o webserver.o
 	$(CC) -o $@ $^ $(CFLAGS) -L/usr/local/lib -lmicrohttpd

@@ -68,7 +68,7 @@ int main()
                 // D Drill down – Start
                 // H Drill up – Stop
             }
-            sprintf(buffer, "x = %d, y = %d, drill = %d\n", x, y, d);
+            sprintf(buffer, "A x = %d, y = %d, drill = %d\n", x, y, d);
             printf("send: %s", buffer);
             write(fdw, buffer, strlen(buffer));
         }

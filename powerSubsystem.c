@@ -118,17 +118,10 @@ void readBatteryTemp(PowerSubsystemData* data) {
 
 #ifdef BEAGLEBONE
 
-    FILE *ain,*aval0,*aval1;
+    FILE *aval0,*aval1;
     int temp;
 
-    ain = fopen("/sys/devices/bone_capemgr.9/slots", "w");
-    fseek(ain,0,SEEK_SET);
-    fprintf(ain,"cape-bone-iio");
-    fflush(ain);
-
-    usleep(500);
-
-    aval0 = fopen("/sys/devices/ocp.3/helper.15/AIN1", "r");
+    aval0 = fopen("/sys/devices/ocp.3/helper.16/AIN1", "r");
     fseek(aval0, 0, SEEK_SET); // go to beginning of buffer
     fscanf(aval0, "%d", &temp); // write analog value to buffer
     fclose(aval0); // close buffer
@@ -136,12 +129,10 @@ void readBatteryTemp(PowerSubsystemData* data) {
     **batteryTempPtr1 = ((double) temp) / 100.0;
     **batteryTempPtr1 = **batteryTempPtr1 * 32 + 33;
 
-    aval1 = fopen("/sys/devices/ocp.3/helper.15/AIN2", "r");
+    aval1 = fopen("/sys/devices/ocp.3/helper.16/AIN2", "r");
     fseek(aval1, 0, SEEK_SET); // go to beginning of buffer
     fscanf(aval1, "%d", &temp); // write analog value to buffer
     fclose(aval1); // close buffer
-
-    fclose(ain);
 
     **batteryTempPtr2 = ((double) temp) / 100.0;
     **batteryTempPtr2 = **batteryTempPtr2 * 32 + 33;
@@ -176,22 +167,13 @@ void readBatteryLevel(PowerSubsystemData* data) {
     Bool* solarPanelState = data->solarPanelState;
 
     volatile int i, j;
-    FILE *ain,*aval0,*aval1;
+    FILE *aval0,*aval1;
 #ifdef BEAGLEBONE
 
-    ain = fopen("/sys/devices/bone_capemgr.9/slots", "w");
-    fseek(ain,0,SEEK_SET);
-    fprintf(ain,"cape-bone-iio");
-    fflush(ain);
-
-    usleep(600);
-
-    aval0 = fopen("/sys/devices/ocp.3/helper.15/AIN0", "r");
+    aval0 = fopen("/sys/devices/ocp.3/helper.16/AIN0", "r");
     fseek(aval0, 0, SEEK_SET); // go to beginning of buffer
     fscanf(aval0, "%d", (*batteryLevPtr + powerCount % 16)); // write analog value to buffer
     fclose(aval0); // close buffer
-
-    fclose(ain);
 
     *batteryLev = *(*batteryLevPtr + powerCount % 16) * 100 / 1800;
     *(*batteryLevPtr + powerCount % 16) *= 20;
@@ -233,6 +215,15 @@ void powerSubsystem(void* data) {
 
 }
 
+
+void enableADCforPowerSystem() {
+    FILE *ain;
+    ain = fopen("/sys/devices/bone_capemgr.9/slots", "w");
+    fseek(ain,0,SEEK_SET);
+    fprintf(ain,"cape-bone-iio");
+    fflush(ain);
+    fclose(ain);
+}
 
 
 

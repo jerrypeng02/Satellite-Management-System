@@ -103,7 +103,7 @@ char response = NULL;
 // solar panel control
 Bool dmsInc = FALSE;
 Bool dmsDec = FALSE;
-unsigned short motorDriveSpeed = 0;
+unsigned short motorDriveSpeed = 20;
 
 // warning alarm
 Bool fuelLow = FALSE;
@@ -166,6 +166,8 @@ void startup() {
     enableGPIOforTransport();
     enableGPIOforWarning();
     enablePWMforSolarPanelControl();
+    enableADCforPowerSystem();
+    usleep(600);
 #endif
 
     taskCounter = 0;
@@ -205,7 +207,7 @@ void startup() {
     // solar panel control
     dmsInc = FALSE;
     dmsDec = FALSE;
-    motorDriveSpeed = 0;
+    motorDriveSpeed = 20;
 
     // warning alarm
     fuelLow = FALSE;
@@ -264,7 +266,7 @@ void startup() {
     keyBoardConsoleTask.priority = 9;
     keyBoardConsoleTask.next = NULL;
     keyBoardConsoleTask.prev = NULL;
-    insert(&keyBoardConsoleTask);
+    //insert(&keyBoardConsoleTask);
 
     // ThrusterSubsystemData
     thrusterSubsystemData.thrusterComm = &thrusterComm;
@@ -297,6 +299,7 @@ void startup() {
     commandManagementData.display = &display;
     commandManagementData.thrusterComm = &thrusterComm;
     commandManagementData.vehicleCommand = &vehicleCommand;
+    commandManagementData.motorDriveSpeed = &motorDriveSpeed;
 
     commandManagementTask.taskDataPtr = (void*)&commandManagementData;
     commandManagementTask.taskPtr = commandManagement;
@@ -387,20 +390,6 @@ int main(void) {
     while (1) {
         tcbPtr = head;
         int t = 0;
-        /*if ((solarPanelState && !solarPanelDeploy) || 
-                (!solarPanelState && !solarPanelRetract)) {
-            if (append==1) {
-                printf("Appending solar and keyboard\n");
-                insert(&solarPanelControlTask);
-                insert(&keyBoardConsoleTask);
-                append = 0;
-            }
-        } else if (!append) { 
-            printf("Removing solar and keyboard\n");
-            delete(&solarPanelControlTask);
-            delete(&keyBoardConsoleTask);
-            append = 1;
-        } */ 
         while (tcbPtr != NULL) {
             //printf("%d\n", tcbPtr->priority);
             tcbPtr->taskPtr((tcbPtr->taskDataPtr));
@@ -500,10 +489,12 @@ void isr1() {
 
 // image scan
 void isr2() {
+    insert(&solarPanelControlTask);
     insert(&keyBoardConsoleTask);
 }
 
 // send image data
 void isr3() {
+    delete(&solarPanelControlTask);
     delete(&keyBoardConsoleTask);
 }

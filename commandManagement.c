@@ -57,7 +57,7 @@ void commandManagement(void* data) {
             value = getParamValuePtr(getEarthPayload());
 
             if (value != NULL) {
-                response[0] = 'A';
+                response[0] = 'M';
                 strncpy(response + 1, value, 100);
             } else {
                 response[0] = 'E';
@@ -73,6 +73,15 @@ void commandManagement(void* data) {
                 response[0] = 'E';
                 response[1] = '\0';
             }
+
+        case 'i':
+                *commandManagementData->motorDriveSpeed += 5;
+                response[0] = 'A';
+                response[1] = '\0';
+        case 'd':
+                *commandManagementData->motorDriveSpeed -= 5;
+                response[0] = 'A';
+                response[1] = '\0';
         case '\0':
             break;
         default:

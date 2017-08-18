@@ -11,6 +11,7 @@ struct CommandManagementDataStruct {
     Bool* display;
     unsigned int* thrusterComm;
     char* vehicleCommand;
+    unsigned short* motorDriveSpeed;
 };
 typedef struct CommandManagementDataStruct CommandManagementData;
 

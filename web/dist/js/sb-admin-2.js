@@ -60,9 +60,7 @@ $(function() {
             payload : $('#input-payload').val()
         }, function(data, textStatus, jqHXR) {
             $('#response-body').html(data);
-            if (data == 'success') {
-                setTimeout(getResponse, 5000);
-            }
+            setTimeout(getResponse, 5000);
         }); 
     });
 });

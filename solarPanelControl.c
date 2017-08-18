@@ -130,12 +130,12 @@ void generatePWM(unsigned short speed){
 #ifdef BEAGLEBONE
     FILE *duty,*period;
 
-	period = fopen("/sys/devices/ocp.3/pwm_test_P9_14.16/period", "w");
+	period = fopen("/sys/devices/ocp.3/pwm_test_P9_14.15/period", "w");
 	fseek(period,0,SEEK_SET);
 	fprintf(period,"%d",500000000);
 	fflush(period);
 
-	duty = fopen("/sys/devices/ocp.3/pwm_test_P9_14.16/duty", "w");
+	duty = fopen("/sys/devices/ocp.3/pwm_test_P9_14.15/duty", "w");
 	fseek(duty,0,SEEK_SET);
 	fprintf(duty,"%d",speed * (500000000/ 100));
 	fflush(duty);
@@ -148,7 +148,7 @@ void generatePWM(unsigned short speed){
 void enablePWM() {
 #ifdef BEAGLEBONE
     FILE *run;
-	run = fopen("/sys/devices/ocp.3/pwm_test_P9_14.16/run", "w");
+	run = fopen("/sys/devices/ocp.3/pwm_test_P9_14.15/run", "w");
 
 	fseek(run,0,SEEK_SET);
 	fprintf(run,"%d",1);
@@ -160,7 +160,7 @@ void enablePWM() {
 void disablePWM(){
 #ifdef BEAGLEBONE
     FILE *run;
-	run = fopen("/sys/devices/ocp.3/pwm_test_P9_14.16/run", "w");
+	run = fopen("/sys/devices/ocp.3/pwm_test_P9_14.15/run", "w");
 
 	fseek(run,0,SEEK_SET);
 	fprintf(run,"%d",0);
